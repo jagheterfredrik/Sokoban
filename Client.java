@@ -22,8 +22,8 @@ public class Client {
 
             Board board = new Board(lIn);
             System.out.println(board);
-            board.doMove(1);
-            System.out.println(board);
+            
+            new Agent().solve(board, 40);
     
             //now, we should find a solution to the sokoban
 

@@ -11,7 +11,21 @@ public class Board {
 	@SuppressWarnings("unchecked")
 	public Board(Board board, int move) {
 		this.board = (Vector<Vector<Character>>) board.board.clone();
+		this.currX = board.currX;
+		this.currY = board.currY;
+		this.width = board.width;
+		this.height = board.height;
 		doMove(move);
+	}
+	
+	public int unsolvedBoxes() {
+		int sum = 0;
+		for (int i = 0; i<board.size(); ++i)
+			for (int j = 0; j<board.get(i).size(); ++j) 
+				if (board.get(i).get(j) == '.')
+					++sum;
+		return sum;
+			
 	}
 	
 	public Board(BufferedReader lIn) throws IOException {
@@ -28,9 +42,9 @@ public class Board {
         {
             lLine=lIn.readLine();
             if(width < 0) {
-            	width = lLine.length()-1;
+            	width = lLine.length();
             }
-            assert(width == lLine.length()-1);
+            assert(width == lLine.length());
             Vector<Character> line = new Vector<Character>(lLine.length()-1);
             for(int j = 0; j<lLine.length(); ++j) {
             	char l = lLine.charAt(j);
@@ -70,62 +84,81 @@ public class Board {
 			switch(i) {
 			case 0: //UP
 				if(currY>=2) {
-					int val = board.get(currX).get(currY-1);
+					int val = board.get(currY-1).get(currX);
 					if (val == ' ' || val == '.') ret.add(i);
 					break;
 				}
 				if (currY>=3) {
-					int val = board.get(currX).get(currY-1);
-					int push = board.get(currX).get(currY-2);
-					if (val == '#' && (push == ' ' || push == '.')) {
+					int val = board.get(currY-1).get(currX);
+					int push = board.get(currY-2).get(currX);
+					if (val == '$' && (push == ' ' || push == '.')) {
 						ret.add(i);
+						board.get(currY-1).set(currX, ' ');
+						board.get(currY-2).set(currX, 'X');
 					}
 				}
 				break;
 			case 1: //DOWN
-				if(currY<=height-2) {
-					int val = board.get(currX).get(currY+1);
+				if(currY<height-2) {
+					int val = board.get(currY+1).get(currX);
 					if (val == ' ' || val == '.') ret.add(i);
 					break;
 				}
 				if(currY<=height-3) {
-					int val = board.get(currX).get(currY+1);
-					int push = board.get(currX).get(currY+2);
-					if (val == '#' && (push == ' ' || push == '.')) {
+					int val = board.get(currY+1).get(currX);
+					int push = board.get(currY+2).get(currX);
+					if (val == '$' && (push == ' ' || push == '.')) {
 						ret.add(i);
+						board.get(currY+1).set(currX, ' ');
+						board.get(currY+2).set(currX, 'X');
 					}
 				}
 			case 2: //LEFT
 				if(currX>=2) {
-					int val = board.get(currX-1).get(currY);
+					int val = board.get(currY).get(currX-1);
 					if (val == ' ' || val == '.') ret.add(i);
 					break;
 				}
 				if (currX>=3) {
-					int val = board.get(currX-1).get(currY);
-					int push = board.get(currX-2).get(currY);
-					if (val == '#' && (push == ' ' || push == '.')) {
+					int val = board.get(currY).get(currX-1);
+					int push = board.get(currY).get(currX-2);
+					if (val == '$' && (push == ' ' || push == '.')) {
 						ret.add(i);
+						board.get(currY).set(currY-1, ' ');
+						board.get(currY).set(currY-2, 'X');
 					}
 				}
 				break;
 			case 3: //RIGHT
-				if(currX<=width-2) {
-					int val = board.get(currX+1).get(currY);
+				if(currX<width-2) {
+					int val = board.get(currY).get(currX+1);
 					if (val == ' ' || val == '.') ret.add(i);
 					break;
 				}
 				if(currX<=width-3) {
-					int val = board.get(currX+1).get(currY);
-					int push = board.get(currX+2).get(currY);
-					if (val == '#' && (push == ' ' || push == '.')) {
+					int val = board.get(currY).get(currX+1);
+					int push = board.get(currY).get(currX+2);
+					if (val == '$' && (push == ' ' || push == '.')) {
 						ret.add(i);
+						board.get(currY).set(currY+1, ' ');
+						board.get(currY).set(currY+2, 'X');
 					}
 				}
 			}
 		}
 		
 		return ret;
+	}
+	
+	public int hashCode() {
+		int sum = 0;
+		System.out.println("H: "+height+", W: "+width);
+		for (int i = 0; i<height; ++i)
+			for (int j = 0; j<width; ++j)
+				//@TODO: CHECK HASH FUNCTION!!
+				sum += board.get(i).get(j) ^ i ^ j;
+		System.out.println(sum);
+		return sum;
 	}
 	
 	/*
