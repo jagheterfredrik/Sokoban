@@ -1,31 +1,68 @@
-import java.util.Vector;
+import java.util.*;
 
 public class Agent {
-	Vector<Integer> visited;
+	boolean debug;
+	HashSet<Board> visited;
 	
-	public void solve(Board board, int depth) {
-		if(depth == 0) return;
-		if (visited == null)
-			visited = new Vector<Integer>();
-		if(visited.contains(board.hashCode())) {
-			System.out.println("*cont: "+visited);
-			return;
-		} else {
-			visited.add(board.hashCode());
+	Agent(boolean d)
+	{
+		debug = d;
+		visited = new HashSet<Board>();
+	}
+	
+	public String solve(Board board, int depth) {
+		if(debug)
+			System.out.println("D: " + depth);
+		
+		if(depth == 0){
+			return null;
 		}
-		System.out.println(board);
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		
+		if(visited.contains(board))
+		{
+			if(debug)
+				System.out.println("VISITED");
+			return null;
 		}
-		if (board.unsolvedBoxes() == 0) System.out.println("SOLUTION FOUND");
-		Vector<Integer> moves = board.findPossibleMoves();
-		System.out.println(moves);
-		for(Integer move : moves) {
-			//System.out.println(new Board(board, move));
-			solve(new Board(board, move), depth-1);
+		else
+			visited.add(board);
+		
+		if(debug)
+			System.out.println(board);
+		
+		if(debug)
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+		if (board.unsolvedBoxes() == 0)
+		{
+			System.out.println("SOLUTION FOUND");
+			return "";
+		}
+		
+		Vector<Character> moves = board.findPossibleMoves();
+		if(debug)
+			System.out.println(moves);
+		for(Character move : moves) {
+			String res = solve(new Board(board, move), depth-1);
+			if(res!=null)
+				return move+res;
+		}
+		return null;
+	}
+	
+	public static void printSolution(Board board,String sol)
+	{
+		Board b = board;
+		System.out.println(b);
+		for(int i = 0;i < sol.length(); ++i)
+		{
+			b = new Board(b, sol.charAt(i));
+			System.out.println(b);
 		}
 	}
 }
