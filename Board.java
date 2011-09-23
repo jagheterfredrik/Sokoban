@@ -7,6 +7,8 @@ public class Board {
 	public int currX, currY;
 	public int width=-1, height=-1;
 	Vector<Vector<Character>> board;
+	Board BFSParent;
+	char parentMove;
 
 	@SuppressWarnings("unchecked")
 	public Board(Board board, char move) {
@@ -23,6 +25,7 @@ public class Board {
 		this.currY = board.currY;
 		this.width = board.width;
 		this.height = board.height;
+		BFSParent = null;
 		doMove(move);
 	}
 	
@@ -33,16 +36,7 @@ public class Board {
 		this.currY = board.currY;
 		this.width = board.width;
 		this.height = board.height;
-	}
-
-	public int unsolvedBoxes() {
-		int sum = 0;
-		for (int i = 0; i<board.size(); ++i)
-			for (int j = 0; j<board.get(i).size(); ++j) 
-				if (board.get(i).get(j) == '.')
-					++sum;
-		return sum;
-
+		BFSParent = null;
 	}
 
 	public Board(BufferedReader lIn) throws IOException {
@@ -65,6 +59,50 @@ public class Board {
 			Vector<Character> line = new Vector<Character>(lLine.length()-1);
 			for(int j = 0; j<lLine.length(); ++j) {
 				char l = lLine.charAt(j);
+				if(l=='@') 
+				{ 
+					// @ is nothing special to the board, it's just you!
+					currX = j;
+					currY = i;
+					line.add(' '); // Replace with empty boardspace
+				} 
+				else if(l=='+') 
+				{ 
+					// @ is nothing special to the board, it's just you!
+					currX = j;
+					currY = i;
+					line.add('.'); // Replace with empty boardspace
+				} 
+				else 
+				{
+					line.add(l);
+				}
+			}
+			board.add(line);
+			//here, we would store the row somewhere, to build our board
+			//in this demo, we just print it
+			//System.out.println(lLine);
+		}
+		//System.out.println("NUM: "+findPossibleMoves().size());	
+		BFSParent = null;
+	}
+	
+	public Board(String[] b) throws IOException {
+		//read number of rows
+		height = b.length;
+
+		board = new Vector<Vector<Character>>(height);
+
+		//read each row
+		for(int i=0;i<height;i++)
+		{
+			if(width < 0) {
+				width = b[i].length();
+			}
+			assert(width == b[i].length());
+			Vector<Character> line = new Vector<Character>(width);
+			for(int j = 0; j<width; ++j) {
+				char l = b[i].charAt(j);
 				if(l=='@') { // @ is nothing special to the board, it's just you!
 					currX = j;
 					currY = i;
@@ -79,6 +117,19 @@ public class Board {
 			//System.out.println(lLine);
 		}
 		//System.out.println("NUM: "+findPossibleMoves().size());	
+		BFSParent = null;
+	}
+	
+	/*
+	 * Counts the number of unsolvedbo*es. When 0 a solution is found.
+	 */
+	public int unsolvedBoxes() {
+		int sum = 0;
+		for (int i = 0; i<board.size(); ++i)
+			for (int j = 0; j<board.get(i).size(); ++j) 
+				if (board.get(i).get(j) == '.')
+					++sum;
+		return sum;
 	}
 
 	/*
@@ -93,15 +144,15 @@ public class Board {
 				board.get(currY).set(currX, ' ');
 				
 				if(board.get(currY-1).get(currX) == '.')
-					board.get(currY-1).set(currX, 'X');
+					board.get(currY-1).set(currX, '*');
 				else
 					board.get(currY-1).set(currX, '$');	
 			}
-			else if(board.get(currY).get(currX) == 'X'){
+			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
 				
 				if(board.get(currY-1).get(currX) == '.')
-					board.get(currY-1).set(currX, 'X');
+					board.get(currY-1).set(currX, '*');
 				else
 					board.get(currY-1).set(currX, '$');	
 			}
@@ -112,15 +163,15 @@ public class Board {
 				board.get(currY).set(currX, ' ');
 				
 				if(board.get(currY+1).get(currX) == '.')
-					board.get(currY+1).set(currX, 'X');
+					board.get(currY+1).set(currX, '*');
 				else
 					board.get(currY+1).set(currX, '$');	
 			}
-			else if(board.get(currY).get(currX) == 'X'){
+			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
 				
 				if(board.get(currY+1).get(currX) == '.')
-					board.get(currY+1).set(currX, 'X');
+					board.get(currY+1).set(currX, '*');
 				else
 					board.get(currY+1).set(currX, '$');	
 			}
@@ -131,15 +182,15 @@ public class Board {
 				board.get(currY).set(currX, ' ');
 				
 				if(board.get(currY).get(currX-1) == '.')
-					board.get(currY).set(currX-1, 'X');
+					board.get(currY).set(currX-1, '*');
 				else
 					board.get(currY).set(currX-1, '$');	
 			}
-			else if(board.get(currY).get(currX) == 'X'){
+			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
 				
 				if(board.get(currY).get(currX-1) == '.')
-					board.get(currY).set(currX-1, 'X');
+					board.get(currY).set(currX-1, '*');
 				else
 					board.get(currY).set(currX-1, '$');	
 			}
@@ -150,15 +201,15 @@ public class Board {
 				board.get(currY).set(currX, ' ');
 				
 				if(board.get(currY).get(currX+1) == '.')
-					board.get(currY).set(currX+1, 'X');
+					board.get(currY).set(currX+1, '*');
 				else
 					board.get(currY).set(currX+1, '$');	
 			}
-			else if(board.get(currY).get(currX) == 'X'){
+			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
 				
 				if(board.get(currY).get(currX+1) == '.')
-					board.get(currY).set(currX+1, 'X');
+					board.get(currY).set(currX+1, '*');
 				else
 					board.get(currY).set(currX+1, '$');	
 			}
@@ -176,25 +227,25 @@ public class Board {
 		//UP
 		if(board.get(currY-1).get(currX) == ' ' || board.get(currY-1).get(currX) == '.')
 			ret.add('U');
-		else if(board.get(currY-1).get(currX) == '$' || board.get(currY-1).get(currX) == 'X')
+		else if(board.get(currY-1).get(currX) == '$' || board.get(currY-1).get(currX) == '*')
 			if(board.get(currY-2).get(currX) == ' ' || board.get(currY-2).get(currX) == '.')
 				ret.add('U');
 		//DOWN
 		if(board.get(currY+1).get(currX) == ' ' || board.get(currY+1).get(currX) == '.')
 			ret.add('D');
-		else if(board.get(currY+1).get(currX) == '$' || board.get(currY+1).get(currX) == 'X')
+		else if(board.get(currY+1).get(currX) == '$' || board.get(currY+1).get(currX) == '*')
 			if(board.get(currY+2).get(currX) == ' ' || board.get(currY+2).get(currX) == '.')
 				ret.add('D');
 		//LEFT
 		if(board.get(currY).get(currX-1) == ' ' || board.get(currY).get(currX-1) == '.')
 			ret.add('L');
-		else if(board.get(currY).get(currX-1) == '$' || board.get(currY).get(currX-1) == 'X')
+		else if(board.get(currY).get(currX-1) == '$' || board.get(currY).get(currX-1) == '*')
 			if(board.get(currY).get(currX-2) == ' ' || board.get(currY).get(currX-2) == '.')
 				ret.add('L');
 		//RIGHT
 		if(board.get(currY).get(currX+1) == ' ' || board.get(currY).get(currX+1) == '.')
 			ret.add('R');
-		else if(board.get(currY).get(currX+1) == '$' || board.get(currY).get(currX+1) == 'X')
+		else if(board.get(currY).get(currX+1) == '$' || board.get(currY).get(currX+1) == '*')
 			if(board.get(currY).get(currX+2) == ' ' || board.get(currY).get(currX+2) == '.')
 				ret.add('R');
 
@@ -202,7 +253,7 @@ public class Board {
 		return ret;
 	}
 	
-	//@TODO: fix this shit!
+	// TODO fix this shit!
 	public boolean hasDeadlock()
 	{
 		return false;
@@ -260,9 +311,16 @@ public class Board {
 		for (int i = 0; i<board.size(); ++i) {
 			for (int j = 0; j<board.get(i).size(); ++j) {
 				if(currX == j && currY == i)
-					res.append('@');
+				{
+					if(board.get(i).get(j) == '.')
+						res.append('+');
+					else
+						res.append('@');
+				}
 				else
+				{
 					res.append(board.get(i).get(j));
+				}
 			}
 			res.append('\n');
 		}

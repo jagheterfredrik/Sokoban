@@ -21,22 +21,43 @@ public class Client {
 			lOut.println(pArgs[2]);
 			lOut.flush();
 
-			Board board = new Board(lIn);
-			System.out.println(board);
-
-			String res = (new Agent(false).solve(board, 60));
-			Agent.printSolution(board, res);
+			boolean corr = false;
 			
+			Board board;
+			//Correct shit
+			if(corr)
+			{
+				board = new Board(lIn);
+			}
+			else
+			{
+				//TEST SHIT
+				String[] lol = new String[7];
+				lol[0] = "#########";
+				lol[1] = "#.     .#";
+				lol[2] = "#  $ $  #";
+				lol[3] = "#   @   #";
+				lol[4] = "#  $ $  #";
+				lol[5] = "#.     .#";
+				lol[6] = "#########";
+
+				board = new Board(lol);
+			}
+
+			System.out.println(board);
+			String res = new Agent(false).solveBFS(board);
+			Agent.printSolution(board, res, 200);
 			System.out.println(res);
 			System.out.println(res.length());
+
 			//now, we should find a solution to the sokoban
 
 			//we've found our solution (this is actually the solution to board 1)    
 			//String lMySol="U R R U U L D L L U L L D R R R R L D D R U R U D L L U R";
 			//these formats are also valid:
-			String lMySol="URRUULDLLULLDRRRRLDDRURUDLLUR";
-			System.out.println(lMySol);
-			System.out.println(lMySol.length());
+			//String lMySol="URRUULDLLULLDRRRRLDDRURUDLLUR";
+			//System.out.println(lMySol);
+			//System.out.println(lMySol.length());
 			//String lMySol="0 3 3 0 0 2 1 2 2 0 2 2 1 3 3 3 3 2 1 1 3 0 3 0 1 2 2 0 3";
 
 			//send the solution to the server
