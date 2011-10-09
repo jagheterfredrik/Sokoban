@@ -20,32 +20,13 @@ public class Client {
 
 			lOut.println(pArgs[2]);
 			lOut.flush();
-
-			boolean corr = false;
 			
-			Board board;
-			//Correct shit
-			if(corr)
-			{
-				board = new Board(lIn);
-			}
-			else
-			{
-				//TEST SHIT
-				String[] lol = new String[7];
-				lol[0] = "#########";
-				lol[1] = "#.     .#";
-				lol[2] = "#  $ $  #";
-				lol[3] = "#   @   #";
-				lol[4] = "#  $ $  #";
-				lol[5] = "#.     .#";
-				lol[6] = "#########";
-
-				board = new Board(lol);
-			}
-
+			Board board = new Board(lIn);
+			
 			System.out.println(board);
+			
 			String res = new Agent(false).solveBFS(board);
+			
 			Agent.printSolution(board, res, 200);
 			System.out.println(res);
 			System.out.println(res.length());

@@ -14,12 +14,12 @@ public class Board {
 	public Board(Board board, char move) {
 
 		this.board = new Vector<Vector<Character>>();
-	
+
 		for (int i = 0; i<board.board.size(); ++i){
 			this.board.add(new Vector<Character>(board.board.get(i).size()));
 			for (int j = 0; j<board.board.get(i).size(); ++j)
 				this.board.get(i).add(board.board.get(i).get(j));
-				
+
 		}
 		this.currX = board.currX;
 		this.currY = board.currY;
@@ -28,7 +28,7 @@ public class Board {
 		BFSParent = null;
 		doMove(move);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public Board(Board board) {
 		this.board = (Vector<Vector<Character>>) board.board.clone();
@@ -86,7 +86,7 @@ public class Board {
 		//System.out.println("NUM: "+findPossibleMoves().size());	
 		BFSParent = null;
 	}
-	
+
 	public Board(String[] b) throws IOException {
 		//read number of rows
 		height = b.length;
@@ -119,7 +119,7 @@ public class Board {
 		//System.out.println("NUM: "+findPossibleMoves().size());	
 		BFSParent = null;
 	}
-	
+
 	/*
 	 * Counts the number of unsolvedbo*es. When 0 a solution is found.
 	 */
@@ -142,7 +142,7 @@ public class Board {
 			currY--;
 			if(board.get(currY).get(currX) == '$'){
 				board.get(currY).set(currX, ' ');
-				
+
 				if(board.get(currY-1).get(currX) == '.')
 					board.get(currY-1).set(currX, '*');
 				else
@@ -150,7 +150,7 @@ public class Board {
 			}
 			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
-				
+
 				if(board.get(currY-1).get(currX) == '.')
 					board.get(currY-1).set(currX, '*');
 				else
@@ -161,7 +161,7 @@ public class Board {
 			currY++;
 			if(board.get(currY).get(currX) == '$'){
 				board.get(currY).set(currX, ' ');
-				
+
 				if(board.get(currY+1).get(currX) == '.')
 					board.get(currY+1).set(currX, '*');
 				else
@@ -169,7 +169,7 @@ public class Board {
 			}
 			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
-				
+
 				if(board.get(currY+1).get(currX) == '.')
 					board.get(currY+1).set(currX, '*');
 				else
@@ -180,7 +180,7 @@ public class Board {
 			currX--;
 			if(board.get(currY).get(currX) == '$'){
 				board.get(currY).set(currX, ' ');
-				
+
 				if(board.get(currY).get(currX-1) == '.')
 					board.get(currY).set(currX-1, '*');
 				else
@@ -188,7 +188,7 @@ public class Board {
 			}
 			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
-				
+
 				if(board.get(currY).get(currX-1) == '.')
 					board.get(currY).set(currX-1, '*');
 				else
@@ -199,7 +199,7 @@ public class Board {
 			currX++;
 			if(board.get(currY).get(currX) == '$'){
 				board.get(currY).set(currX, ' ');
-				
+
 				if(board.get(currY).get(currX+1) == '.')
 					board.get(currY).set(currX+1, '*');
 				else
@@ -207,7 +207,7 @@ public class Board {
 			}
 			else if(board.get(currY).get(currX) == '*'){
 				board.get(currY).set(currX, '.');
-				
+
 				if(board.get(currY).get(currX+1) == '.')
 					board.get(currY).set(currX+1, '*');
 				else
@@ -252,13 +252,14 @@ public class Board {
 		assert(ret.size() <= 4);
 		return ret;
 	}
-	
-	// TODO fix this shit!
+
+	// TODO fix this so be able to prune more.
 	public boolean hasDeadlock()
 	{
 		return false;
 	}
 
+	
 	@Override
 	public int hashCode() 
 	{
@@ -272,19 +273,19 @@ public class Board {
 		//System.out.println(sb.toString().hashCode());
 		return sb.toString().hashCode();
 	}
-	
+
 	@Override
 	public boolean equals(Object b)
 	{	
-		
+
 		if(this == b)
 			return true;
 		if(!(b instanceof Board))
 			return false;
-		
+
 		Board that = (Board) b;
-		
-		
+
+
 		for(int i = 0; i < height; ++i)
 		{
 			for(int j = 0; j < width; ++j)
@@ -295,10 +296,10 @@ public class Board {
 		}
 		if(this.currY != that.currY)
 			return false;
-		
+
 		if(this.currX != that.currX)
 			return false;
-		
+
 		return true;
 	}
 

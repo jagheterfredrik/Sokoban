@@ -125,7 +125,8 @@ public class Agent {
 		}
 		double time2 = (double) (System.nanoTime() - time1);
 		time2 = time2 / 1000 / 1000 / 1000;
-		System.out.println("Solotion found in " + time2 + "s");
+		
+		//System.out.println("Solotion found in " + time2 + "s");
 		
 		return sb.toString();
 	}
@@ -134,14 +135,14 @@ public class Agent {
 	private Vector<Character> randomize(Vector<Character> m)
 	{
 		Random rand = new Random();
-		Vector<Character> lol = new Vector<Character>();
+		Vector<Character> randomized = new Vector<Character>();
 		for(int i = m.size(); i > 0; --i)
 		{
 			int take = rand.nextInt(i);
-			lol.add(m.get(take));
+			randomized.add(m.get(take));
 			m.remove(take);
 		}
-		return lol;
+		return randomized;
 	}
 
 	public static void printSolution(Board board,String sol, int waittime)
