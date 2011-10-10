@@ -123,7 +123,7 @@ public class Board implements Comparable<Board> {
 	}
 
 	/*
-	 * Counts the number of unsolvedbo*es. When 0 a solution is found.
+	 * Counts the number of unsolvedboxes. When 0 a solution is found.
 	 */
 	public int unsolvedBoxes() {
 		int sum = 0;
@@ -307,6 +307,39 @@ public class Board implements Comparable<Board> {
 	// TODO fix this so be able to prune more.
 	public boolean hasDeadlock()
 	{
+		for(int i = 0; i < width; ++i)
+		{
+			for(int j = 0; j < height; ++j)
+			{
+				if(board.get(j).get(i) == '$')
+				{
+					if(isBlockingShit(j-1, i-1) && isBlockingShit(j, i-1) && isBlockingShit(j-1, i))
+						return true;
+					
+					if(isBlockingShit(j-1, i+1) && isBlockingShit(j-1, i) && isBlockingShit(j, i+1))
+						return true;
+					
+					if(isBlockingShit(j+1, i+1) && isBlockingShit(j, i+1) && isBlockingShit(j+1, i))
+						return true;
+					
+					if(isBlockingShit(j+1, i-1) && isBlockingShit(j, i-1) && isBlockingShit(j+1, i))
+						return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	private boolean isBlockingShit(int y, int x){
+		if(board.get(y).get(x) == '#')
+			return true;
+		
+		if(board.get(y).get(x) == '$')
+			return true;
+		
+		if(board.get(y).get(x) == '*')
+			return true;
+		
 		return false;
 	}
 
@@ -356,7 +389,7 @@ public class Board implements Comparable<Board> {
 	
 
 	public int compareTo(Board b){
-		return (this.gScore + this.hScore) - (b.gScore + b.hScore);
+		return (this.hScore) - (b.hScore);
 	}
 
 	/*

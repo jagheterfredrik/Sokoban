@@ -20,6 +20,7 @@ public class Agent {
 	}
 	
 	public String solveAStar(Board start){
+		int deadCount = 0;
 		long time1 = System.nanoTime();
 		HashSet<Board> closedSet = new HashSet<Board>();
 		
@@ -45,6 +46,7 @@ public class Agent {
 				double time2 = (double) (System.nanoTime() - time1);
 				time2 = time2 / 1000 / 1000 / 1000;
 				
+				System.out.println("Nr of deadlocks: " + deadCount);
 				System.out.println("Solotion found in " + time2 + "s");
 				return sb.toString();
 			}
@@ -52,23 +54,29 @@ public class Agent {
 			closedSet.add(x);
 			for(Character c : x.findPossibleMoves()){
 				Board y = new Board(x, c);
+				
 				if(closedSet.contains(y))
 					continue;
+				
+				if(y.hasDeadlock()){
+					deadCount++;
+					continue;
+				}
 				
 				y.gScore = x.gScore + 1;
 				y.hScore = y.score();
 				
 				if(!openSet.contains(y)){
 					openSet.add(y);
-				}else{
+				}
+				else{
 					continue;
 				}
 				y.BFSParent = x;
 				y.parentMove = c;
 			}
 		}
-		return "LOL";
-		
+		return "";
 	}
 	
 
@@ -185,6 +193,9 @@ public class Agent {
 			{
 				newBoard = new Board(b, move);
 
+				if(newBoard.hasDeadlock())
+					continue;
+				
 				if(debug){
 					System.out.println(moves);
 					System.out.println(newBoard);
@@ -235,7 +246,6 @@ public class Agent {
 		return sb.toString();
 	}
 
-
 	private Vector<Character> randomize(Vector<Character> m)
 	{
 		Random rand = new Random();
@@ -257,7 +267,7 @@ public class Agent {
 		for(int i = 0;i < sol.length(); ++i)
 		{
 			b = new Board(b, sol.charAt(i));
-			System.out.println(i+1);
+			System.out.println(i+1 + "/" + sol.length());
 			System.out.println(b.findPossibleMoves());
 			System.out.println(b);
 

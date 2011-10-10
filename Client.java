@@ -23,13 +23,26 @@ public class Client {
 			
 			Board board = new Board(lIn);
 			
+			/*
+			String[] lol = new String[10];
+			lol[0] = "##########";
+			lol[1] = "#.   .  .#";
+			lol[2] = "####  ####";
+			lol[3] = "#        #";
+			lol[4] = "#        #";
+			lol[5] = "#        #";
+			lol[6] = "#        #";
+			lol[7] = "#  $ $ $ #";
+			lol[8] = "#@       #";
+			lol[9] = "##########";
+			Board board = new Board(lol);
+			*/
+			
 			System.out.println(board);
-			
 			String res = new Agent(false).solveAStar(board);
-			
-			Agent.printSolution(board, res, 200);
+			//Agent.printSolution(board, res, 200);
 			System.out.println(res);
-			System.out.println(res.length());
+			System.out.println("Solution lenght: " + res.length());
 
 			//now, we should find a solution to the sokoban
 
