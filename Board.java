@@ -1,13 +1,16 @@
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Vector;
+import java.util.*;
 
-public class Board {
+public class Board implements Comparable<Board> {
 	public int currX, currY;
 	public int width=-1, height=-1;
 	Vector<Vector<Character>> board;
 	Board BFSParent;
 	char parentMove;
+	
+	int gScore;
+	int hScore;
 
 	@SuppressWarnings("unchecked")
 	public Board(Board board, char move) {
@@ -349,6 +352,11 @@ public class Board {
 			return false;
 
 		return true;
+	}
+	
+
+	public int compareTo(Board b){
+		return (this.gScore + this.hScore) - (b.gScore + b.hScore);
 	}
 
 	/*

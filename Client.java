@@ -25,7 +25,7 @@ public class Client {
 			
 			System.out.println(board);
 			
-			String res = new Agent(false).solveIDAStar(board);
+			String res = new Agent(false).solveAStar(board);
 			
 			Agent.printSolution(board, res, 200);
 			System.out.println(res);

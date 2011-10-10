@@ -9,7 +9,6 @@ public class Agent {
 		debug = d;
 		visited = new HashSet<Board>();
 	}
-	
 
 	class IdaSolution {
 		public IdaSolution(int costLimit, String solution) {
@@ -19,6 +18,59 @@ public class Agent {
 		public int costLimit;
 		public String solution;
 	}
+	
+	public String solveAStar(Board start){
+		long time1 = System.nanoTime();
+		HashSet<Board> closedSet = new HashSet<Board>();
+		
+		PriorityQueue<Board> openSet = new PriorityQueue<Board>();
+		openSet.add(start);
+		
+		start.gScore = 0;
+		start.hScore = start.score();
+		
+		while(!openSet.isEmpty())
+		{
+			Board x = openSet.poll();
+			if(x.unsolvedBoxes() == 0)
+			{
+				StringBuilder sb = new StringBuilder();
+
+				while(x.BFSParent != null)
+				{
+					sb.insert(0, x.parentMove);
+					x = x.BFSParent;
+				}
+				
+				double time2 = (double) (System.nanoTime() - time1);
+				time2 = time2 / 1000 / 1000 / 1000;
+				
+				System.out.println("Solotion found in " + time2 + "s");
+				return sb.toString();
+			}
+			
+			closedSet.add(x);
+			for(Character c : x.findPossibleMoves()){
+				Board y = new Board(x, c);
+				if(closedSet.contains(y))
+					continue;
+				
+				y.gScore = x.gScore + 1;
+				y.hScore = y.score();
+				
+				if(!openSet.contains(y)){
+					openSet.add(y);
+				}else{
+					continue;
+				}
+				y.BFSParent = x;
+				y.parentMove = c;
+			}
+		}
+		return "LOL";
+		
+	}
+	
 
 	public String solveIDAStar(Board board) {
 		int costLimit = board.score();
@@ -47,9 +99,9 @@ public class Agent {
 		int nextLimit = Integer.MAX_VALUE;
 		for(Character move : board.findPossibleMoves()) {
 			Board newBoard = new Board(board, move);
+			visited.add(newBoard);
 			int newCost = startCost + newBoard.score();
 			IdaSolution res = idaDFS(newBoard, newCost, costLimit);
-			System.out.println(newBoard);
 			if(res.solution != null) {
 				
 				return new IdaSolution(res.costLimit, move + res.solution);
@@ -178,7 +230,7 @@ public class Agent {
 		double time2 = (double) (System.nanoTime() - time1);
 		time2 = time2 / 1000 / 1000 / 1000;
 		
-		//System.out.println("Solotion found in " + time2 + "s");
+		System.out.println("Solotion found in " + time2 + "s");
 		
 		return sb.toString();
 	}
