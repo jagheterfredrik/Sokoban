@@ -2,7 +2,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Vector;
 
-
 public class Board {
 	public int currX, currY;
 	public int width=-1, height=-1;
@@ -215,6 +214,55 @@ public class Board {
 			}
 			break;
 		}
+	}
+	
+	class BoardPos {
+		public BoardPos(int x, int y) {
+			this.x = x; this.y = y;
+		}
+		int x, y;
+		int distance(BoardPos bp) {
+			return Math.abs(x-bp.x) + Math.abs(y-bp.y);
+		}
+	}
+	
+	public int score() {
+		Vector<BoardPos> boxes = new Vector<BoardPos>();
+		Vector<BoardPos> holders = new Vector<BoardPos>();
+		
+		for(int i=0; i<width; ++i) {
+			for(int j=0; j<height; ++j) {
+				char c = board.get(j).get(i);
+				if(c == '$')
+					boxes.add(new BoardPos(i, j));
+				else if(c == '.')
+					holders.add(new BoardPos(i, j));
+			}
+		}
+
+		int tot = 0;
+		for(BoardPos box : boxes) {
+			int last = Integer.MAX_VALUE;
+			for(BoardPos holder : holders) {
+				int len = holder.distance(box);
+				last = Math.min(len, last);
+			}
+			tot += last;
+		}
+		return tot;
+	}
+	
+	boolean isDeadlock() {
+		for(int i=0; i<width-1; ++i) {
+			for(int j=0; j<height-1; ++j) {
+				char a = board.get(j).get(i);
+				char b = board.get(j+1).get(i);
+				char c = board.get(j).get(i+1);
+				char d = board.get(j+1).get(i+1);
+				//CHECKA grejer bredvid varann
+			}
+		}
+		return false;
 	}
 
 	/*

@@ -9,6 +9,58 @@ public class Agent {
 		debug = d;
 		visited = new HashSet<Board>();
 	}
+	
+
+	class IdaSolution {
+		public IdaSolution(int costLimit, String solution) {
+			this.costLimit = costLimit;
+			this.solution = solution;
+		}
+		public int costLimit;
+		public String solution;
+	}
+
+	public String solveIDAStar(Board board) {
+		int costLimit = board.score();
+		System.out.println(""+costLimit);
+		IdaSolution ir;
+		while(true){
+
+			ir = idaDFS(board, 0, costLimit);
+			if(ir.solution != null)
+				return ir.solution;
+
+			if(ir.costLimit == Integer.MAX_VALUE)
+				return null;
+			
+			costLimit = ir.costLimit;
+			System.out.printf("cost limit is %d\n", costLimit);
+		}
+	}
+
+
+	public IdaSolution idaDFS(Board board, int startCost, int costLimit) {
+		int minimumCost = startCost + board.score();
+		if(minimumCost > costLimit) return new IdaSolution(minimumCost, null);
+		if(board.unsolvedBoxes() == 0) return new IdaSolution(startCost, "");
+
+		int nextLimit = Integer.MAX_VALUE;
+		for(Character move : board.findPossibleMoves()) {
+			Board newBoard = new Board(board, move);
+			int newCost = startCost + newBoard.score();
+			IdaSolution res = idaDFS(newBoard, newCost, costLimit);
+			System.out.println(newBoard);
+			if(res.solution != null) {
+				
+				return new IdaSolution(res.costLimit, move + res.solution);
+			}
+			nextLimit = Math.min(nextLimit, res.costLimit);
+		}
+		return new IdaSolution(nextLimit, null);
+	}
+
+
+
 
 	public String solveDFS(Board board, int depth) {
 		if(debug)
@@ -97,7 +149,7 @@ public class Agent {
 
 
 				newBoard.BFSParent = b;
-				newBoard.parentMove = move;		
+				newBoard.parentMove = move;
 
 				if(newBoard.unsolvedBoxes() == 0)
 				{
@@ -113,7 +165,7 @@ public class Agent {
 				System.out.println("V: " + visited.size());
 			}
 			if(sluta)
-				break;	
+				break;
 		}
 
 		StringBuilder sb = new StringBuilder();
