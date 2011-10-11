@@ -51,17 +51,20 @@ public class Agent {
 				return sb.toString();
 			}
 			
+			
+			if(x.hasDeadlock()){
+				deadCount++;
+				//System.out.println("DEADLOCK");
+				continue;
+			}
+			
+			
 			closedSet.add(x);
 			for(Character c : x.findPossibleMoves()){
 				Board y = new Board(x, c);
 				
 				if(closedSet.contains(y))
 					continue;
-				
-				if(y.hasDeadlock()){
-					deadCount++;
-					continue;
-				}
 				
 				y.gScore = x.gScore + 1;
 				y.hScore = y.score();
@@ -194,7 +197,10 @@ public class Agent {
 				newBoard = new Board(b, move);
 
 				if(newBoard.hasDeadlock())
+				{
+					visited.add(newBoard);
 					continue;
+				}
 				
 				if(debug){
 					System.out.println(moves);
@@ -267,6 +273,10 @@ public class Agent {
 		for(int i = 0;i < sol.length(); ++i)
 		{
 			b = new Board(b, sol.charAt(i));
+			
+			if(b.hasDeadlock())
+				System.out.println("DEADLOCK");
+			
 			System.out.println(i+1 + "/" + sol.length());
 			System.out.println(b.findPossibleMoves());
 			System.out.println(b);
