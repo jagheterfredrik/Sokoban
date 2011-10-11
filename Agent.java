@@ -21,18 +21,17 @@ public class Agent {
 	
 	public String solveAStar(Board start){
 		int deadCount = 0;
-		long time1 = System.nanoTime();
-		HashSet<Board> closedSet = new HashSet<Board>();
 		
-		PriorityQueue<Board> openSet = new PriorityQueue<Board>();
-		openSet.add(start);
+		
+		PriorityQueue<Board> priorityQueue = new PriorityQueue<Board>();
+		priorityQueue.add(start);
 		
 		start.gScore = 0;
 		start.hScore = start.score();
 		
-		while(!openSet.isEmpty())
+		while(!priorityQueue.isEmpty())
 		{
-			Board x = openSet.poll();
+			Board x = priorityQueue.poll();
 			if(x.unsolvedBoxes() == 0)
 			{
 				StringBuilder sb = new StringBuilder();
@@ -43,11 +42,7 @@ public class Agent {
 					x = x.BFSParent;
 				}
 				
-				double time2 = (double) (System.nanoTime() - time1);
-				time2 = time2 / 1000 / 1000 / 1000;
-				
-				System.out.println("Nr of deadlocks: " + deadCount);
-				System.out.println("Solotion found in " + time2 + "s");
+				//System.out.println("Nr of deadlocks: " + deadCount);
 				return sb.toString();
 			}
 			
@@ -59,18 +54,18 @@ public class Agent {
 			}
 			
 			
-			closedSet.add(x);
+			visited.add(x);
 			for(Character c : x.findPossibleMoves()){
 				Board y = new Board(x, c);
 				
-				if(closedSet.contains(y))
+				if(visited.contains(y))
 					continue;
 				
 				y.gScore = x.gScore + 1;
 				y.hScore = y.score();
 				
-				if(!openSet.contains(y)){
-					openSet.add(y);
+				if(!priorityQueue.contains(y)){
+					priorityQueue.add(y);
 				}
 				else{
 					continue;
@@ -160,8 +155,6 @@ public class Agent {
 		}
 
 		Vector<Character> moves = board.findPossibleMoves();
-		//if(moves.size() > 0)
-		//moves = randomize(moves);
 		if(debug)
 			System.out.println(moves);
 		for(Character move : moves) {
@@ -174,7 +167,6 @@ public class Agent {
 
 	public String solveBFS(Board board)
 	{
-		long time1 = System.nanoTime();
 		board.BFSParent = null;
 		Board b = board;
 
@@ -185,7 +177,7 @@ public class Agent {
 		LinkedList<Board> q = new LinkedList<Board>();
 		q.addLast(b);
 		visited.add(b);
-		boolean sluta = false;
+		boolean stop = false;
 		while(!q.isEmpty())
 		{
 			b = q.pollFirst();
@@ -223,7 +215,7 @@ public class Agent {
 				if(newBoard.unsolvedBoxes() == 0)
 				{
 					b = newBoard;
-					sluta = true;
+					stop = true;
 					break;
 				}
 			}
@@ -233,7 +225,7 @@ public class Agent {
 				System.out.println("Q: " + q.size());
 				System.out.println("V: " + visited.size());
 			}
-			if(sluta)
+			if(stop)
 				break;
 		}
 
@@ -243,12 +235,7 @@ public class Agent {
 		{
 			sb.insert(0, b.parentMove);
 			b = b.BFSParent;
-		}
-		double time2 = (double) (System.nanoTime() - time1);
-		time2 = time2 / 1000 / 1000 / 1000;
-		
-		System.out.println("Solotion found in " + time2 + "s");
-		
+		}		
 		return sb.toString();
 	}
 

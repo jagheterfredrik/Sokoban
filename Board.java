@@ -9,7 +9,7 @@ public class Board implements Comparable<Board> {
 	public static int[][] BOARDWEIGHT;
 	Board BFSParent;
 	char parentMove;
-	
+
 	int gScore;
 	int hScore;
 
@@ -20,7 +20,7 @@ public class Board implements Comparable<Board> {
 		this.width = board.width;
 		this.height = board.height;
 		BFSParent = null;
-		
+
 		this.board = new char[width][height];
 
 		for (int x = 0; x < width; ++x){
@@ -28,7 +28,7 @@ public class Board implements Comparable<Board> {
 				this.board[x][y] = board.board[x][y];
 
 		}
-		
+
 		doMove(move);
 	}
 
@@ -39,7 +39,7 @@ public class Board implements Comparable<Board> {
 		this.width = board.width;
 		this.height = board.height;
 		BFSParent = null;
-		
+
 		this.board = new char[width][height];
 
 		for (int x = 0; x < width; ++x){
@@ -50,13 +50,13 @@ public class Board implements Comparable<Board> {
 	}
 
 	public Board(BufferedReader lIn) throws IOException {
-		
+
 		String lLine=lIn.readLine();
 
 		//read number of rows
 		int lNumRows=Integer.parseInt(lLine);
 		height = lNumRows;
-		
+
 		lLine=lIn.readLine();
 		width = lLine.length();
 
@@ -94,23 +94,25 @@ public class Board implements Comparable<Board> {
 			//in this demo, we just print it
 			//System.out.println(lLine);
 		}
-		
+
 		BOARDWEIGHT = new int[width][height];
-		
-		System.out.println("H: " + height);
-		System.out.println("W: " + width);
+
 		for(int x = 0; x < width; ++x)
 		{
 			for(int y = 0; y < height; ++y)
 			{
 				if(board[x][y] == '#')
 					BOARDWEIGHT[x][y] = 0;
+				else if(board[x][y] == '.' || board[x][y] == '*' || board[x][y] == '+')
+					BOARDWEIGHT[x][y] = 0;
 				else
-					BOARDWEIGHT[x][y] = 1;
-					
+					BOARDWEIGHT[x][y] = Integer.MAX_VALUE;
 			}
 		}
-		
+
+		BoardWeightCalculator bwc = new BoardWeightCalculator(this);
+		bwc.calculateBoardWeight();
+
 		//System.out.println("NUM: "+findPossibleMoves().size());	
 		BFSParent = null;
 	}
@@ -120,7 +122,7 @@ public class Board implements Comparable<Board> {
 		//read number of rows
 		height = b.length;
 		width = b[0].length();
-		
+
 
 		board = new char[width][height];
 
@@ -149,24 +151,25 @@ public class Board implements Comparable<Board> {
 				}
 			}
 		}
-		
+
 		BOARDWEIGHT = new int[width][height];
-		
-		System.out.println("H: " + height);
-		System.out.println("W: " + width);
-		System.out.println(board.length);
-		System.out.println(board[0].length);
+
 		for(int x = 0; x < width; ++x)
 		{
 			for(int y = 0; y < height; ++y)
 			{
 				if(board[x][y] == '#')
 					BOARDWEIGHT[x][y] = 0;
+				else if(board[x][y] == '.' || board[x][y] == '*' || board[x][y] == '+')
+					BOARDWEIGHT[x][y] = 0;
 				else
-					BOARDWEIGHT[x][y] = 1;
+					BOARDWEIGHT[x][y] = Integer.MAX_VALUE;
 			}
 		}
-		
+
+		BoardWeightCalculator bwc = new BoardWeightCalculator(this);
+		bwc.calculateBoardWeight();
+
 		//System.out.println("NUM: "+findPossibleMoves().size());	
 		BFSParent = null;
 	}
@@ -183,95 +186,108 @@ public class Board implements Comparable<Board> {
 		return sum;
 	}
 
-	 /*
-     * Moves the little warehouse keeper; U up - D down - L left - R right
-     */
-    public void doMove(char move) {
-            assert(findPossibleMoves().contains(move));
-            switch(move){
-            case 'U':
-                    currY--;
-                    if(board[currX][currY] == '$'){
-                            board[currX][currY] =  ' ';
+	/*
+	 * Moves the little warehouse keeper; U up - D down - L left - R right
+	 */
+	public void doMove(char move) {
+		assert(findPossibleMoves().contains(move));
+		switch(move){
+		case 'U':
+			currY--;
+			if(board[currX][currY] == '$'){
+				board[currX][currY] =  ' ';
 
-                            if(board[currX][currY-1] == '.')
-                                    board[currX][currY-1] =  '*';
-                            else
-                                    board[currX][currY-1] =  '$';        
-                    }
-                    else if(board[currX][currY] == '*'){
-                            board[currX][currY] =  '.';
+				if(board[currX][currY-1] == '.')
+					board[currX][currY-1] =  '*';
+				else
+					board[currX][currY-1] =  '$';        
+			}
+			else if(board[currX][currY] == '*'){
+				board[currX][currY] =  '.';
 
-                            if(board[currX][currY-1] == '.')
-                                    board[currX][currY-1] =  '*';
-                            else
-                                    board[currX][currY-1] =  '$';        
-                    }
-                    break;
-            case 'D':
-                    currY++;
-                    if(board[currX][currY] == '$'){
-                            board[currX][currY] =  ' ';
+				if(board[currX][currY-1] == '.')
+					board[currX][currY-1] =  '*';
+				else
+					board[currX][currY-1] =  '$';        
+			}
+			break;
+		case 'D':
+			currY++;
+			if(board[currX][currY] == '$'){
+				board[currX][currY] =  ' ';
 
-                            if(board[currX][currY+1] == '.')
-                                    board[currX][currY+1] =  '*';
-                            else
-                                    board[currX][currY+1] =  '$';        
-                    }
-                    else if(board[currX][currY] == '*'){
-                            board[currX][currY] =  '.';
+				if(board[currX][currY+1] == '.')
+					board[currX][currY+1] =  '*';
+				else
+					board[currX][currY+1] =  '$';        
+			}
+			else if(board[currX][currY] == '*'){
+				board[currX][currY] =  '.';
 
-                            if(board[currX][currY+1] == '.')
-                                    board[currX][currY+1] =  '*';
-                            else
-                                    board[currX][currY+1] =  '$';        
-                    }
-                    break;
-            case 'L':
-                    currX--;
-                    if(board[currX][currY] == '$'){
-                            board[currX][currY] =  ' ';
+				if(board[currX][currY+1] == '.')
+					board[currX][currY+1] =  '*';
+				else
+					board[currX][currY+1] =  '$';        
+			}
+			break;
+		case 'L':
+			currX--;
+			if(board[currX][currY] == '$'){
+				board[currX][currY] =  ' ';
 
-                            if(board[currX-1][currY] == '.')
-                                    board[currX-1][currY] =  '*';
-                            else
-                                    board[currX-1][currY] =  '$';        
-                    }
-                    else if(board[currX][currY] == '*'){
-                            board[currX][currY] =  '.';
+				if(board[currX-1][currY] == '.')
+					board[currX-1][currY] =  '*';
+				else
+					board[currX-1][currY] =  '$';        
+			}
+			else if(board[currX][currY] == '*'){
+				board[currX][currY] =  '.';
 
-                            if(board[currX-1][currY] == '.')
-                                    board[currX-1][currY] =  '*';
-                            else
-                                    board[currX-1][currY] =  '$';        
-                    }
-                    break;
-            case 'R':
-                    currX++;
-                    if(board[currX][currY] == '$'){
-                            board[currX][currY] =  ' ';
+				if(board[currX-1][currY] == '.')
+					board[currX-1][currY] =  '*';
+				else
+					board[currX-1][currY] =  '$';        
+			}
+			break;
+		case 'R':
+			currX++;
+			if(board[currX][currY] == '$'){
+				board[currX][currY] =  ' ';
 
-                            if(board[currX+1][currY] == '.')
-                                    board[currX+1][currY] =  '*';
-                            else
-                                    board[currX+1][currY] =  '$';        
-                    }
-                    else if(board[currX][currY] == '*'){
-                            board[currX][currY] =  '.';
+				if(board[currX+1][currY] == '.')
+					board[currX+1][currY] =  '*';
+				else
+					board[currX+1][currY] =  '$';        
+			}
+			else if(board[currX][currY] == '*'){
+				board[currX][currY] =  '.';
 
-                            if(board[currX+1][currY] == '.')
-                                    board[currX+1][currY] =  '*';
-                            else
-                                    board[currX+1][currY] =  '$';        
-                    }
-                    break;
-            }
-    }
-		
+				if(board[currX+1][currY] == '.')
+					board[currX+1][currY] =  '*';
+				else
+					board[currX+1][currY] =  '$';        
+			}
+			break;
+		}
+	}
+
 	public int score() {
+		int sum = 0;
+		for(int x = 0; x < width; x++)
+		{
+			for(int y = 0; y < height; ++y)
+			{
+				if(board[x][y] == '$')
+					sum += BOARDWEIGHT[x][y];
+			}
+		}
+		return sum;
+	}
+	
+	public int score2() {
 		Vector<BoardPos> boxes = new Vector<BoardPos>();
 		Vector<BoardPos> holders = new Vector<BoardPos>();
-		
+
 		for(int x=0; x<width; ++x) {
 			for(int y=0; y<height; ++y) {
 				char c = board[x][y];
@@ -293,7 +309,7 @@ public class Board implements Comparable<Board> {
 		}
 		return tot;
 	}
-	
+
 	/*
 	 * Finds all possible moves from our current location.
 	 * @return Vector<Character> with all possible moves.
@@ -330,142 +346,142 @@ public class Board implements Comparable<Board> {
 		return ret;
 	}
 
-    // TODO fix this so be able to prune more.
-    public boolean hasDeadlock()
-    {
-            for(int x = 0; x < width; ++x)
-            {
-                    for(int y = 0; y < height; ++y)
-                    {
-                            if(board[x][y] == '$')
-                            {
-                            		if(BOARDWEIGHT[x][y] == -1)
-                            			return true;
-                            		
-                                    //4x squares
-                                    if(isBlocking(x-1, y-1) && isBlocking(x-1, y) && isBlocking(x, y-1))
-                                            return true;
-                                    
-                                    if(isBlocking(x+1, y-1) && isBlocking(x, y-1) && isBlocking(x+1, y))
-                                            return true;
-                                    
-                                    if(isBlocking(x+1, y+1) && isBlocking(x+1, y) && isBlocking(x, y+1))
-                                            return true;
-                                    
-                                    if(isBlocking(x-1, y+1) && isBlocking(x-1, y) && isBlocking(x, y+1))
-                                            return true;                                        
-                            }
-                    }
-            }
-            return false;
-    }
-    
-    private boolean isWall(int x, int y){
-            if(board[x][y] == '#')
-                    return true;
-            else
-                    return false;
-    }
-    
-    private boolean isBlocking(int x, int y){
-            if(board[x][y] == '#')
-                    return true;
-            
-            if(board[x][y] == '$')
-                    return true;
-            
-            if(board[x][y] == '*')
-                    return true;
-            
-            return false;
-    }
+	// TODO fix this so be able to prune more.
+	public boolean hasDeadlock()
+	{
+		for(int x = 0; x < width; ++x)
+		{
+			for(int y = 0; y < height; ++y)
+			{
+				if(board[x][y] == '$')
+				{
+					if(BOARDWEIGHT[x][y] == -2)
+						return true;
 
-    
-    @Override
-    public int hashCode() 
-    {
-            int sum = 0;
-            //System.out.println("H: "+height+", W: "+width);
-            StringBuilder sb = new StringBuilder(""+currX+currY);
-            for (int x = 0; x<width; ++x)
-                    for (int y = 0; y<height; ++y)
-                            //@TODO: CHECK HASH FUNCTION!!
-                            sb.append(board[x][y]+x+y);
-            //System.out.println(sb.toString().hashCode());
-            return sb.toString().hashCode();
-    }
+					//4x squares
+					if(isBlocking(x-1, y-1) && isBlocking(x-1, y) && isBlocking(x, y-1))
+						return true;
 
-    @Override
-    public boolean equals(Object b)
-    {        
+					if(isBlocking(x+1, y-1) && isBlocking(x, y-1) && isBlocking(x+1, y))
+						return true;
 
-            if(this == b)
-                    return true;
-            if(!(b instanceof Board))
-                    return false;
+					if(isBlocking(x+1, y+1) && isBlocking(x+1, y) && isBlocking(x, y+1))
+						return true;
 
-            Board that = (Board) b;
+					if(isBlocking(x-1, y+1) && isBlocking(x-1, y) && isBlocking(x, y+1))
+						return true;                                        
+				}
+			}
+		}
+		return false;
+	}
+
+	private boolean isWall(int x, int y){
+		if(board[x][y] == '#')
+			return true;
+		else
+			return false;
+	}
+
+	private boolean isBlocking(int x, int y){
+		if(board[x][y] == '#')
+			return true;
+
+		if(board[x][y] == '$')
+			return true;
+
+		if(board[x][y] == '*')
+			return true;
+
+		return false;
+	}
 
 
-            for(int x = 0; x < width; ++x)
-            {
-                    for(int y = 0; y < height; ++y)
-                    {
-                            if(this.board[x][y] != that.board[x][y])
-                                    return false;
-                    }
-            }
-            if(this.currY != that.currY)
-                    return false;
+	@Override
+	public int hashCode() 
+	{
+		int sum = 0;
+		//System.out.println("H: "+height+", W: "+width);
+		StringBuilder sb = new StringBuilder(""+currX+currY);
+		for (int x = 0; x<width; ++x)
+			for (int y = 0; y<height; ++y)
+				//@TODO: CHECK HASH FUNCTION!!
+				sb.append(board[x][y]+x+y);
+		//System.out.println(sb.toString().hashCode());
+		return sb.toString().hashCode();
+	}
 
-            if(this.currX != that.currX)
-                    return false;
+	@Override
+	public boolean equals(Object b)
+	{        
 
-            return true;
-    }
-    
+		if(this == b)
+			return true;
+		if(!(b instanceof Board))
+			return false;
 
-    public int compareTo(Board b){
-            return (this.hScore) - (b.hScore);
-    }
+		Board that = (Board) b;
 
-    /*
-     * (non-Javadoc)
-     * @see java.lang.Object#toString()
-     */
-    public String toString() {
-            StringBuilder res = new StringBuilder();
-            for (int y = 0; y < height; y++) {
-                    for (int x = 0; x < width; ++x) {
-                            if(currX == x && currY == y)
-                            {
-                                    if(board[x][y] == '.')
-                                            res.append('+');
-                                    else
-                                            res.append('@');
-                            }
-                            else
-                            {
-                                    res.append(board[x][y]);
-                            }
-                    }
-                    res.append('\n');
-            }
-            return res.toString();
-    }
-    
-    public String boardWeightToString()
-    {
-            StringBuilder sb = new StringBuilder();
-            for(int y = 0; y < height; ++y)
-            {
-                    for(int x = 0; x < width; ++x)
-                    {
-                            sb.append(BOARDWEIGHT[x][y]);
-                    }
-                    sb.append('\n');
-            }
-            
-            return sb.toString();
-    }
+
+		for(int x = 0; x < width; ++x)
+		{
+			for(int y = 0; y < height; ++y)
+			{
+				if(this.board[x][y] != that.board[x][y])
+					return false;
+			}
+		}
+		if(this.currY != that.currY)
+			return false;
+
+		if(this.currX != that.currX)
+			return false;
+
+		return true;
+	}
+
+
+	public int compareTo(Board b){
+		return (this.hScore) - (b.hScore);
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		StringBuilder res = new StringBuilder();
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; ++x) {
+				if(currX == x && currY == y)
+				{
+					if(board[x][y] == '.')
+						res.append('+');
+					else
+						res.append('@');
+				}
+				else
+				{
+					res.append(board[x][y]);
+				}
+			}
+			res.append('\n');
+		}
+		return res.toString();
+	}
+
+	public String boardWeightToString()
+	{
+		StringBuilder sb = new StringBuilder();
+		for(int y = 0; y < height; ++y)
+		{
+			for(int x = 0; x < width; ++x)
+			{
+				sb.append(BOARDWEIGHT[x][y]);
+			}
+			sb.append('\n');
+		}
+
+		return sb.toString();
+	}
 }
