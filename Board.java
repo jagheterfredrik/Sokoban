@@ -34,12 +34,19 @@ public class Board implements Comparable<Board> {
 
 	@SuppressWarnings("unchecked")
 	public Board(Board board) {
-		this.board = board.board.clone();
 		this.currX = board.currX;
 		this.currY = board.currY;
 		this.width = board.width;
 		this.height = board.height;
 		BFSParent = null;
+		
+		this.board = new char[width][height];
+
+		for (int x = 0; x < width; ++x){
+			for (int y = 0; y < height; ++y)
+				this.board[x][y] = board.board[x][y];
+
+		}
 	}
 
 	public Board(BufferedReader lIn) throws IOException {
@@ -260,17 +267,7 @@ public class Board implements Comparable<Board> {
                     break;
             }
     }
-	
-	class BoardPos {
-		public BoardPos(int x, int y) {
-			this.x = x; this.y = y;
-		}
-		int x, y;
-		int distance(BoardPos bp) {
-			return Math.abs(x-bp.x) + Math.abs(y-bp.y);
-		}
-	}
-	
+		
 	public int score() {
 		Vector<BoardPos> boxes = new Vector<BoardPos>();
 		Vector<BoardPos> holders = new Vector<BoardPos>();
