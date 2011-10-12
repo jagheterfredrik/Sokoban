@@ -21,9 +21,9 @@ public class Client {
 			lOut.println(pArgs[2]);
 			lOut.flush();
 			
-			Board board = new Board(lIn);
+			//Board board = new Board(lIn);
 			
-			/*
+			
 			String[] lol = new String[15];
 			lol[0]  = "###############";
 			lol[1]  = "#             #";
@@ -42,7 +42,7 @@ public class Client {
 			lol[14] = "###############";
 			Board board = new Board(lol);
 			System.out.println(board.hasDeadlock());
-			*/
+			
 			
 			System.out.println(board);
 			System.out.println(board.boardWeightToString());

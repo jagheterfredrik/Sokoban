@@ -163,12 +163,15 @@ public class Board implements Comparable<Board> {
 				else if(board[x][y] == '.' || board[x][y] == '*' || board[x][y] == '+')
 					BOARDWEIGHT[x][y] = 0;
 				else
-					BOARDWEIGHT[x][y] = Integer.MAX_VALUE;
+					BOARDWEIGHT[x][y] = 9;
 			}
 		}
 
-		BoardWeightCalculator bwc = new BoardWeightCalculator(this);
-		bwc.calculateBoardWeight();
+		SimpleDeadlockFinder sdf = new SimpleDeadlockFinder(new Board(this));
+		//BoardWeightCalculator bwc = new BoardWeightCalculator(this);
+		//bwc.calculateBoardWeight();
+		
+		
 
 		//System.out.println("NUM: "+findPossibleMoves().size());	
 		BFSParent = null;
@@ -442,7 +445,7 @@ public class Board implements Comparable<Board> {
 
 
 	public int compareTo(Board b){
-		return (this.hScore) - (b.hScore);
+		return (this.hScore + this.gScore) - (b.hScore + b.gScore);
 	}
 
 	/*
