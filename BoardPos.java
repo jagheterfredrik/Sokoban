@@ -2,10 +2,10 @@ import java.math.*;
 import java.util.*;
 class BoardPos {
 	int x, y;
-	int d;
+	int depth;
 	public BoardPos(int x, int y) {
 		this.x = x; this.y = y;
-		d = 0;
+		depth = 0;
 	}
 
 	int distance(BoardPos bp) {

@@ -21,31 +21,32 @@ public class Client {
 			lOut.println(pArgs[2]);
 			lOut.flush();
 			
-			//Board board = new Board(lIn);
+			Board board = new Board(lIn);
 			
-			
+			/*
 			String[] lol = new String[15];
 			lol[0]  = "###############";
-			lol[1]  = "#             #";
-			lol[2]  = "#   $       $ #";
-			lol[3]  = "#             #";
-			lol[4]  = "#       .     #";
-			lol[5]  = "#             #";
-			lol[6]  = "#             #";
-			lol[7]  = "#             #";
-			lol[8]  = "#             #";
+			lol[1]  = "#.#           #";
+			lol[2]  = "#.#           #";
+			lol[3]  = "#.#           #";
+			lol[4]  = "#.#           #";
+			lol[5]  = "#.#           #";
+			lol[6]  = "# #           #";
+			lol[7]  = "# #           #";
+			lol[8]  = "#    $        #";
 			lol[9]  = "#             #";
-			lol[10] = "#       .     #";
-			lol[11] = "#             #";
+			lol[10] = "#    $    $   #";
+			lol[11] = "#  $    $     #";
 			lol[12] = "#             #";
 			lol[13] = "#@            #";
 			lol[14] = "###############";
 			Board board = new Board(lol);
 			System.out.println(board.hasDeadlock());
-			
+			*/
 			
 			System.out.println(board);
 			System.out.println(board.boardWeightToString());
+			System.out.println(board.deadlocksToString());
 			
 			long time1 = System.nanoTime();
 			String res = new Agent(false).solveAStar(board);
@@ -53,7 +54,7 @@ public class Client {
 			time2 = time2 / 1000 / 1000 / 1000;
 			System.out.println("Solotion found in " + time2 + "s");
 			
-			Agent.printSolution(board, res, 0);
+			//Agent.printSolution(board, res, 300);
 			System.out.println(res);
 			System.out.println("Solution lenght: " + res.length());
 

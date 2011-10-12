@@ -4,52 +4,52 @@ import java.util.HashSet;
 
 
 public class SimpleDeadlockFinder {
-        Board board;
-        HashSet<BoardPos> visited;
-        
-        SimpleDeadlockFinder(Board board)
+
+        public static  void notDeadLockSquare(Board board)
         {
-                this.board = board;
-                visited = new HashSet<BoardPos>();
-                notDeadLockSquare();
-        }
-        /*
-         * Method to find simple dead-locks and store them in 
-         * a HashSet notSimpleDeadLock.
-         */
-        public void notDeadLockSquare()
-        {
+        	Board.DEADLOCKS = new int[board.width][board.height];
+
+    		for(int x = 0; x < board.width; ++x)
+    		{
+    			for(int y = 0; y < board.height; ++y)
+    			{
+    					Board.DEADLOCKS[x][y] = 0;
+    			}
+    		}
+        	
+        	HashSet<BoardPos> visited = new HashSet<BoardPos>();;
                 LinkedList<BoardPos> q = new LinkedList<BoardPos>();
-                BoardPos newBoardPos;
-                for (int x = 0; x< this.board.width; ++x){
-                        for (int y = 0; y< this.board.height; ++y){        
-                                if (this.board.board[x][y] == '$')
-                                        this.board.board[x][y] = ' ';
-                                if (this.board.board[x][y] == '*')
-                                        this.board.board[x][y] = '.';
-                                if (this.board.board[x][y] == '@')
-                                        this.board.board[x][y] = ' ';
+                BoardPos boardPos;
+                for (int x = 0; x< board.width; ++x){
+                        for (int y = 0; y< board.height; ++y){        
+                                if (board.board[x][y] == '$')
+                                        board.board[x][y] = ' ';
+                                if (board.board[x][y] == '*')
+                                        board.board[x][y] = '.';
+                                if (board.board[x][y] == '@')
+                                        board.board[x][y] = ' ';
+                                if (board.board[x][y] == '+')
+                                    board.board[x][y] = '.';
                         }
                 }
-                for (int x = 0; x< this.board.width; ++x){
-                        for (int y = 0; y< this.board.height; ++y){ 
-                                if (this.board.board[x][y] == '.'){
-                                        newBoardPos = new BoardPos(x, y);
-                                        visited.add(newBoardPos);
-                                        q.addLast(newBoardPos);
-                                        this.board.currX = x;
-                                        this.board.currY = y;
+                for (int x = 0; x< board.width; ++x){
+                        for (int y = 0; y< board.height; ++y){ 
+                                if (board.board[x][y] == '.'){
+                                	
+                                       	boardPos = new BoardPos(x, y);
+                                       	Board.DEADLOCKS[boardPos.x][boardPos.y] = 1;
+                                        visited.add(boardPos);
+                                        q.addLast(boardPos);
+                                                                 
                                         while(!q.isEmpty()){
-                                                newBoardPos = q.poll();
-                                                this.board.currX = newBoardPos.x;
-                                                this.board.currY = newBoardPos.y;        
-                                                for(BoardPos pull : findPossiblePulls(newBoardPos)){
-                                                        newBoardPos.x = this.board.currX;
-                                                        newBoardPos.y = this.board.currY;
-                                                        
+                                                boardPos = q.poll();
+                                                board.currX = boardPos.x;
+                                                board.currY = boardPos.y;  
+                                                
+                                                for(BoardPos newBoardPos : findPossiblePulls(board, boardPos)){                                                        
                                                         if(visited.add(newBoardPos)){
                                                         	
-                                                                Board.BOARDWEIGHT[newBoardPos.x][newBoardPos.y] = 5;
+                                                                Board.DEADLOCKS[newBoardPos.x][newBoardPos.y] = 1;
                                                                 q.addLast(newBoardPos);
                                                         }
                                                 }
@@ -62,29 +62,29 @@ public class SimpleDeadlockFinder {
          * Help method for method notDeadLockSquare, objective is to find possible pulls
          * from a boardPos and return these in a vector of characters.
          */
-        public Vector<BoardPos> findPossiblePulls(BoardPos boardPos) {
+        public static Vector<BoardPos> findPossiblePulls(Board board, BoardPos boardPos) {
                 Vector<BoardPos> ret = new Vector<BoardPos>();
                 board.currY = boardPos.y;
                 board.currX = boardPos.x;
-                if(board.currY-2 >= 0){
+                if(board.currY-2 > 0){
                         //UP
                         if(board.board[board.currX][board.currY-2] == ' ' || board.board[board.currX][board.currY-2] == '.')
                                 if(board.board[board.currX][board.currY-1] == ' ' || board.board[board.currX][board.currY-1] == '.')
                                         ret.add(new BoardPos(board.currX, board.currY-1));
                 }
-                if(board.currY+2 <= board.height){
+                if(board.currY+2 < board.height){
                         //DOWN
                         if(board.board[board.currX][board.currY+2] == ' ' || board.board[board.currX][board.currY+2] == '.')
                                 if(board.board[board.currX][board.currY+1] == ' ' || board.board[board.currX][board.currY+1] == '.')
                                 	ret.add(new BoardPos(board.currX, board.currY+1));
                 }
-                if(board.currX-2 >= 0){
+                if(board.currX-2 > 0){
                         //LEFT
                         if(board.board[board.currX-2][board.currY] == ' ' || board.board[board.currX-2][board.currY] == '.')
                                 if(board.board[board.currX-1][board.currY] == ' ' || board.board[board.currX-1][board.currY] == '.')
                                 	ret.add(new BoardPos(board.currX-1, board.currY));
                 }
-                if(board.currX <= board.width){
+                if(board.currX+2 < board.width){
                         //RIGHT
                         if(board.board[board.currX+2][board.currY] == ' ' || board.board[board.currX+2][board.currY] == '.')
                                 if(board.board[board.currX+1][board.currY] == ' ' || board.board[board.currX+1][board.currY] == '.')

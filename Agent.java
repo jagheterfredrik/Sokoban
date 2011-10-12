@@ -32,6 +32,7 @@ public class Agent {
 		while(!priorityQueue.isEmpty())
 		{
 			Board x = priorityQueue.poll();
+			//System.out.println(x.boardWeightToString());
 			if(x.unsolvedBoxes() == 0)
 			{
 				StringBuilder sb = new StringBuilder();
@@ -42,7 +43,7 @@ public class Agent {
 					x = x.BFSParent;
 				}
 				
-				//System.out.println("Nr of deadlocks: " + deadCount);
+				System.out.println("Nr of deadlocks: " + deadCount);
 				return sb.toString();
 			}
 			
@@ -61,6 +62,7 @@ public class Agent {
 				if(visited.contains(y))
 					continue;
 				
+				BoardWeightCalculator.calculateBoardWeight(new Board(y));
 				y.gScore = x.gScore + 1;
 				y.hScore = y.score();
 				

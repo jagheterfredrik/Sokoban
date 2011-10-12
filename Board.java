@@ -7,6 +7,7 @@ public class Board implements Comparable<Board> {
 	public int width=-1, height=-1;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
+	public static int[][] DEADLOCKS;
 	Board BFSParent;
 	char parentMove;
 
@@ -95,23 +96,8 @@ public class Board implements Comparable<Board> {
 			//System.out.println(lLine);
 		}
 
-		BOARDWEIGHT = new int[width][height];
-
-		for(int x = 0; x < width; ++x)
-		{
-			for(int y = 0; y < height; ++y)
-			{
-				if(board[x][y] == '#')
-					BOARDWEIGHT[x][y] = 0;
-				else if(board[x][y] == '.' || board[x][y] == '*' || board[x][y] == '+')
-					BOARDWEIGHT[x][y] = 0;
-				else
-					BOARDWEIGHT[x][y] = Integer.MAX_VALUE;
-			}
-		}
-
-		BoardWeightCalculator bwc = new BoardWeightCalculator(this);
-		bwc.calculateBoardWeight();
+		SimpleDeadlockFinder.notDeadLockSquare(new Board(this));
+		BoardWeightCalculator.calculateBoardWeight(new Board(this));
 
 		//System.out.println("NUM: "+findPossibleMoves().size());	
 		BFSParent = null;
@@ -152,24 +138,11 @@ public class Board implements Comparable<Board> {
 			}
 		}
 
-		BOARDWEIGHT = new int[width][height];
 
-		for(int x = 0; x < width; ++x)
-		{
-			for(int y = 0; y < height; ++y)
-			{
-				if(board[x][y] == '#')
-					BOARDWEIGHT[x][y] = 0;
-				else if(board[x][y] == '.' || board[x][y] == '*' || board[x][y] == '+')
-					BOARDWEIGHT[x][y] = 0;
-				else
-					BOARDWEIGHT[x][y] = 9;
-			}
-		}
-
-		SimpleDeadlockFinder sdf = new SimpleDeadlockFinder(new Board(this));
-		//BoardWeightCalculator bwc = new BoardWeightCalculator(this);
-		//bwc.calculateBoardWeight();
+		SimpleDeadlockFinder.notDeadLockSquare(new Board(this));
+		BoardWeightCalculator.calculateBoardWeight(new Board(this));
+		
+		
 		
 		
 
@@ -185,6 +158,18 @@ public class Board implements Comparable<Board> {
 		for (int x = 0; x < width; ++x)
 			for (int y = 0; y < height; ++y) 
 				if (board[x][y] == '.' || board[x][y] == '+')
+					++sum;
+		return sum;
+	}
+	
+	/*
+	 * Counts the number of solvedboxes. When 0 a solution is found.
+	 */
+	public int solvedBoxes() {
+		int sum = 0;
+		for (int x = 0; x < width; ++x)
+			for (int y = 0; y < height; ++y) 
+				if (board[x][y] == '*')
 					++sum;
 		return sum;
 	}
@@ -275,16 +260,17 @@ public class Board implements Comparable<Board> {
 	}
 
 	public int score() {
-		int sum = 0;
+		int score = 0;
 		for(int x = 0; x < width; x++)
 		{
 			for(int y = 0; y < height; ++y)
 			{
 				if(board[x][y] == '$')
-					sum += BOARDWEIGHT[x][y];
+					score += BOARDWEIGHT[x][y];
 			}
 		}
-		return sum;
+		score += (-100 * solvedBoxes());
+		return score;
 	}
 	
 	public int score2() {
@@ -358,7 +344,7 @@ public class Board implements Comparable<Board> {
 			{
 				if(board[x][y] == '$')
 				{
-					if(BOARDWEIGHT[x][y] == -2)
+					if(DEADLOCKS[x][y] == 0)
 						return true;
 
 					//4x squares
@@ -445,6 +431,7 @@ public class Board implements Comparable<Board> {
 
 
 	public int compareTo(Board b){
+		//return (this.hScore) - (b.hScore);
 		return (this.hScore + this.gScore) - (b.hScore + b.gScore);
 	}
 
@@ -480,7 +467,22 @@ public class Board implements Comparable<Board> {
 		{
 			for(int x = 0; x < width; ++x)
 			{
-				sb.append(BOARDWEIGHT[x][y]);
+				sb.append(BOARDWEIGHT[x][y] + "\t");
+			}
+			sb.append('\n');
+		}
+
+		return sb.toString();
+	}
+	
+	public String deadlocksToString()
+	{
+		StringBuilder sb = new StringBuilder();
+		for(int y = 0; y < height; ++y)
+		{
+			for(int x = 0; x < width; ++x)
+			{
+				sb.append(DEADLOCKS[x][y]);
 			}
 			sb.append('\n');
 		}
