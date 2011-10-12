@@ -9,23 +9,23 @@ public class BoardWeightCalculator {
 			for (int y = 0; y < board.height; ++y) {
 				if (board.board[x][y] == '#')
 					Board.BOARDWEIGHT[x][y] = -1;
-				else if (board.board[x][y] == '.' || board.board[x][y] == '+')
+				else if (board.board[x][y] == '.' || board.board[x][y] == '*' || board.board[x][y] == '+')
 					Board.BOARDWEIGHT[x][y] = 0;
 				else
-					Board.BOARDWEIGHT[x][y] = 10000;
+					Board.BOARDWEIGHT[x][y] = 1000;
 			}
 		}
 
 		for (int x = 0; x < board.width; ++x) {
 			for (int y = 0; y < board.height; ++y) {
-				if (board.board[x][y] == '.' || board.board[x][y] == '+') {
+				if (board.board[x][y] == '.' || board.board[x][y] == '*' || board.board[x][y] == '+') {
 					BFS(board, new BoardPos(x, y));
 				}
 			}
 		}
 	}
 
-	public static void BFS(Board board, BoardPos boardPos) {
+	private static void BFS(Board board, BoardPos boardPos) {
 		HashSet<BoardPos> visited = new HashSet<BoardPos>();
 		LinkedList<BoardPos> queue = new LinkedList<BoardPos>();
 
@@ -47,8 +47,8 @@ public class BoardWeightCalculator {
 		}
 
 		for (BoardPos bp : visited) {
-			if (bp.depth * 5 < Board.BOARDWEIGHT[bp.x][bp.y])
-				Board.BOARDWEIGHT[bp.x][bp.y] = bp.depth * 5;
+			if (bp.depth< Board.BOARDWEIGHT[bp.x][bp.y])
+				Board.BOARDWEIGHT[bp.x][bp.y] = bp.depth;
 		}
 	}
 
@@ -75,12 +75,14 @@ public class BoardWeightCalculator {
 		return ret;
 	}
 
+
 	private static boolean isBlocking(char c) {
 		if (c == '#')
 			return true;
+		
 		else if (c == '*')
 			return true;
-
+		
 		return false;
 	}
 

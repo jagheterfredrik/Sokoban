@@ -4,17 +4,16 @@ import java.util.*;
 
 public class Board implements Comparable<Board> {
 	public int currX, currY;
-	public int width=-1, height=-1;
+	public static int width = -1, height = -1;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
 	public static int[][] DEADLOCKS;
 	Board BFSParent;
 	char parentMove;
 
-	int gScore;
-	int hScore;
+	int pathLenght;
+	int heuristic;
 
-	@SuppressWarnings("unchecked")
 	public Board(Board board, char move) {
 		this.currX = board.currX;
 		this.currY = board.currY;
@@ -24,7 +23,7 @@ public class Board implements Comparable<Board> {
 
 		this.board = new char[width][height];
 
-		for (int x = 0; x < width; ++x){
+		for (int x = 0; x < width; ++x) {
 			for (int y = 0; y < height; ++y)
 				this.board[x][y] = board.board[x][y];
 
@@ -33,7 +32,6 @@ public class Board implements Comparable<Board> {
 		doMove(move);
 	}
 
-	@SuppressWarnings("unchecked")
 	public Board(Board board) {
 		this.currX = board.currX;
 		this.currY = board.currY;
@@ -43,7 +41,7 @@ public class Board implements Comparable<Board> {
 
 		this.board = new char[width][height];
 
-		for (int x = 0; x < width; ++x){
+		for (int x = 0; x < width; ++x) {
 			for (int y = 0; y < height; ++y)
 				this.board[x][y] = board.board[x][y];
 
@@ -52,101 +50,84 @@ public class Board implements Comparable<Board> {
 
 	public Board(BufferedReader lIn) throws IOException {
 
-		String lLine=lIn.readLine();
+		String lLine = lIn.readLine();
 
-		//read number of rows
-		int lNumRows=Integer.parseInt(lLine);
+		// read number of rows
+		int lNumRows = Integer.parseInt(lLine);
 		height = lNumRows;
 
-		lLine=lIn.readLine();
+		lLine = lIn.readLine();
 		width = lLine.length();
-
 
 		board = new char[width][height];
 
-		//read each row
-		for(int y=0; y < height; y++)
-		{
-			assert(width == lLine.length());
-			for(int x = 0; x < width; ++x) {
+		// read each row
+		for (int y = 0; y < height; y++) {
+			assert (width == lLine.length());
+			for (int x = 0; x < width; ++x) {
 				char c = lLine.charAt(x);
-				if(c=='@') 
-				{ 
+				if (c == '@') {
 					// @ is nothing special to the board, it's just you!
 					currX = x;
 					currY = y;
-					board[x][y]= ' '; // Replace with empty boardspace
-				} 
-				else if(c=='+') 
-				{ 
-					// + is nothing special to the board, it's just you on a goal!
+					board[x][y] = ' '; // Replace with empty boardspace
+				} else if (c == '+') {
+					// + is nothing special to the board, it's just you on a
+					// goal!
 					currX = x;
 					currY = y;
 					board[x][y] = '.'; // Replace with normal goal.
-				} 
-				else 
-				{
+				} else {
 					board[x][y] = c;
 				}
 			}
-			if(!(y == height -1))
-				lLine=lIn.readLine();
-			//here, we would store the row somewhere, to build our board
-			//in this demo, we just print it
-			//System.out.println(lLine);
+			if (!(y == height - 1))
+				lLine = lIn.readLine();
+			// here, we would store the row somewhere, to build our board
+			// in this demo, we just print it
+			// System.out.println(lLine);
 		}
 
 		SimpleDeadlockFinder.notDeadLockSquare(new Board(this));
 		BoardWeightCalculator.calculateBoardWeight(new Board(this));
 
-		//System.out.println("NUM: "+findPossibleMoves().size());	
+		// System.out.println("NUM: "+findPossibleMoves().size());
 		BFSParent = null;
 	}
 
 	public Board(String[] b) throws IOException {
 
-		//read number of rows
+		// read number of rows
 		height = b.length;
 		width = b[0].length();
 
-
 		board = new char[width][height];
 
-		//read each row
-		for(int y=0; y < height; y++)
-		{
-			for(int x = 0; x < width; ++x) {
+		// read each row
+		for (int y = 0; y < height; y++) {
+			for (int x = 0; x < width; ++x) {
 				char c = b[y].charAt(x);
-				if(c=='@') 
-				{ 
+				if (c == '@') {
 					// @ is nothing special to the board, it's just you!
 					currX = x;
 					currY = y;
-					board[x][y]= ' '; // Replace with empty boardspace
-				} 
-				else if(c=='+') 
-				{ 
-					// + is nothing special to the board, it's just you on a goal!
+					board[x][y] = ' '; // Replace with empty boardspace
+				} else if (c == '+') {
+					// + is nothing special to the board, it's just you on a
+					// goal!
 					currX = x;
 					currY = y;
 					board[x][y] = '.'; // Replace with normal goal.
-				} 
-				else 
-				{
+				} else {
 					board[x][y] = c;
 				}
 			}
 		}
 
-
 		SimpleDeadlockFinder.notDeadLockSquare(new Board(this));
 		BoardWeightCalculator.calculateBoardWeight(new Board(this));
-		
-		
-		
-		
 
-		//System.out.println("NUM: "+findPossibleMoves().size());	
+		// System.out.println("NUM: "+findPossibleMoves().size());
 		BFSParent = null;
 	}
 
@@ -156,19 +137,19 @@ public class Board implements Comparable<Board> {
 	public int unsolvedBoxes() {
 		int sum = 0;
 		for (int x = 0; x < width; ++x)
-			for (int y = 0; y < height; ++y) 
+			for (int y = 0; y < height; ++y)
 				if (board[x][y] == '.' || board[x][y] == '+')
 					++sum;
 		return sum;
 	}
-	
+
 	/*
 	 * Counts the number of solvedboxes. When 0 a solution is found.
 	 */
 	public int solvedBoxes() {
 		int sum = 0;
 		for (int x = 0; x < width; ++x)
-			for (int y = 0; y < height; ++y) 
+			for (int y = 0; y < height; ++y)
 				if (board[x][y] == '*')
 					++sum;
 		return sum;
@@ -178,82 +159,78 @@ public class Board implements Comparable<Board> {
 	 * Moves the little warehouse keeper; U up - D down - L left - R right
 	 */
 	public void doMove(char move) {
-		assert(findPossibleMoves().contains(move));
-		switch(move){
+		assert (findPossibleMoves().contains(move));
+		switch (move) {
 		case 'U':
 			currY--;
-			if(board[currX][currY] == '$'){
-				board[currX][currY] =  ' ';
+			if (board[currX][currY] == '$') {
+				board[currX][currY] = ' ';
 
-				if(board[currX][currY-1] == '.')
-					board[currX][currY-1] =  '*';
+				if (board[currX][currY - 1] == '.')
+					board[currX][currY - 1] = '*';
 				else
-					board[currX][currY-1] =  '$';        
-			}
-			else if(board[currX][currY] == '*'){
-				board[currX][currY] =  '.';
+					board[currX][currY - 1] = '$';
+			} else if (board[currX][currY] == '*') {
+				board[currX][currY] = '.';
 
-				if(board[currX][currY-1] == '.')
-					board[currX][currY-1] =  '*';
+				if (board[currX][currY - 1] == '.')
+					board[currX][currY - 1] = '*';
 				else
-					board[currX][currY-1] =  '$';        
+					board[currX][currY - 1] = '$';
 			}
 			break;
 		case 'D':
 			currY++;
-			if(board[currX][currY] == '$'){
-				board[currX][currY] =  ' ';
+			if (board[currX][currY] == '$') {
+				board[currX][currY] = ' ';
 
-				if(board[currX][currY+1] == '.')
-					board[currX][currY+1] =  '*';
+				if (board[currX][currY + 1] == '.')
+					board[currX][currY + 1] = '*';
 				else
-					board[currX][currY+1] =  '$';        
-			}
-			else if(board[currX][currY] == '*'){
-				board[currX][currY] =  '.';
+					board[currX][currY + 1] = '$';
+			} else if (board[currX][currY] == '*') {
+				board[currX][currY] = '.';
 
-				if(board[currX][currY+1] == '.')
-					board[currX][currY+1] =  '*';
+				if (board[currX][currY + 1] == '.')
+					board[currX][currY + 1] = '*';
 				else
-					board[currX][currY+1] =  '$';        
+					board[currX][currY + 1] = '$';
 			}
 			break;
 		case 'L':
 			currX--;
-			if(board[currX][currY] == '$'){
-				board[currX][currY] =  ' ';
+			if (board[currX][currY] == '$') {
+				board[currX][currY] = ' ';
 
-				if(board[currX-1][currY] == '.')
-					board[currX-1][currY] =  '*';
+				if (board[currX - 1][currY] == '.')
+					board[currX - 1][currY] = '*';
 				else
-					board[currX-1][currY] =  '$';        
-			}
-			else if(board[currX][currY] == '*'){
-				board[currX][currY] =  '.';
+					board[currX - 1][currY] = '$';
+			} else if (board[currX][currY] == '*') {
+				board[currX][currY] = '.';
 
-				if(board[currX-1][currY] == '.')
-					board[currX-1][currY] =  '*';
+				if (board[currX - 1][currY] == '.')
+					board[currX - 1][currY] = '*';
 				else
-					board[currX-1][currY] =  '$';        
+					board[currX - 1][currY] = '$';
 			}
 			break;
 		case 'R':
 			currX++;
-			if(board[currX][currY] == '$'){
-				board[currX][currY] =  ' ';
+			if (board[currX][currY] == '$') {
+				board[currX][currY] = ' ';
 
-				if(board[currX+1][currY] == '.')
-					board[currX+1][currY] =  '*';
+				if (board[currX + 1][currY] == '.')
+					board[currX + 1][currY] = '*';
 				else
-					board[currX+1][currY] =  '$';        
-			}
-			else if(board[currX][currY] == '*'){
-				board[currX][currY] =  '.';
+					board[currX + 1][currY] = '$';
+			} else if (board[currX][currY] == '*') {
+				board[currX][currY] = '.';
 
-				if(board[currX+1][currY] == '.')
-					board[currX+1][currY] =  '*';
+				if (board[currX + 1][currY] == '.')
+					board[currX + 1][currY] = '*';
 				else
-					board[currX+1][currY] =  '$';        
+					board[currX + 1][currY] = '$';
 			}
 			break;
 		}
@@ -261,36 +238,35 @@ public class Board implements Comparable<Board> {
 
 	public int score() {
 		int score = 0;
-		for(int x = 0; x < width; x++)
-		{
-			for(int y = 0; y < height; ++y)
-			{
-				if(board[x][y] == '$')
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; ++y) {
+				if (board[x][y] == '$' || board[x][y] == '*')
 					score += BOARDWEIGHT[x][y];
 			}
 		}
-		score += (-100 * solvedBoxes());
+		score -= (100 * solvedBoxes());
 		return score;
 	}
-	
+
+	/*
 	public int score2() {
 		Vector<BoardPos> boxes = new Vector<BoardPos>();
 		Vector<BoardPos> holders = new Vector<BoardPos>();
 
-		for(int x=0; x<width; ++x) {
-			for(int y=0; y<height; ++y) {
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
 				char c = board[x][y];
-				if(c == '$')
+				if (c == '$')
 					boxes.add(new BoardPos(x, y));
-				else if(c == '.')
+				else if (c == '.')
 					holders.add(new BoardPos(x, y));
 			}
 		}
 
 		int tot = 0;
-		for(BoardPos box : boxes) {
+		for (BoardPos box : boxes) {
 			int last = Integer.MAX_VALUE;
-			for(BoardPos holder : holders) {
+			for (BoardPos holder : holders) {
 				int len = holder.distance(box);
 				last = Math.min(len, last);
 			}
@@ -298,160 +274,180 @@ public class Board implements Comparable<Board> {
 		}
 		return tot;
 	}
+	*/
 
 	/*
 	 * Finds all possible moves from our current location.
+	 * 
 	 * @return Vector<Character> with all possible moves.
 	 */
 	public Vector<Character> findPossibleMoves() {
 		Vector<Character> ret = new Vector<Character>();
 
-		//UP
-		if(board[currX][currY -1] == ' ' || board[currX][currY-1] == '.')
+		// UP
+		if (board[currX][currY - 1] == ' ' || board[currX][currY - 1] == '.')
 			ret.add('U');
-		else if(board[currX][currY-1] == '$' || board[currX][currY-1] == '*')
-			if(board[currX][currY-2] == ' ' || board[currX][currY-2] == '.')
+		else if (board[currX][currY - 1] == '$'
+				|| board[currX][currY - 1] == '*')
+			if (board[currX][currY - 2] == ' '
+					|| board[currX][currY - 2] == '.')
 				ret.add('U');
-		//DOWN
-		if(board[currX][currY+1] == ' ' || board[currX][currY+1] == '.')
+		// DOWN
+		if (board[currX][currY + 1] == ' ' || board[currX][currY + 1] == '.')
 			ret.add('D');
-		else if(board[currX][currY+1] == '$' || board[currX][currY+1] == '*')
-			if(board[currX][currY+2] == ' ' || board[currX][currY+2] == '.')
+		else if (board[currX][currY + 1] == '$'
+				|| board[currX][currY + 1] == '*')
+			if (board[currX][currY + 2] == ' '
+					|| board[currX][currY + 2] == '.')
 				ret.add('D');
-		//LEFT
-		if(board[currX-1][currY] == ' ' || board[currX-1][currY] == '.')
+		// LEFT
+		if (board[currX - 1][currY] == ' ' || board[currX - 1][currY] == '.')
 			ret.add('L');
-		else if(board[currX-1][currY] == '$' || board[currX-1][currY] == '*')
-			if(board[currX-2][currY] == ' ' || board[currX-2][currY] == '.')
+		else if (board[currX - 1][currY] == '$'
+				|| board[currX - 1][currY] == '*')
+			if (board[currX - 2][currY] == ' '
+					|| board[currX - 2][currY] == '.')
 				ret.add('L');
-		//RIGHT
-		if(board[currX+1][currY] == ' ' || board[currX+1][currY] == '.')
+		// RIGHT
+		if (board[currX + 1][currY] == ' ' || board[currX + 1][currY] == '.')
 			ret.add('R');
-		else if(board[currX+1][currY] == '$' || board[currX+1][currY] == '*')
-			if(board[currX+2][currY] == ' ' || board[currX+2][currY] == '.')
+		else if (board[currX + 1][currY] == '$'
+				|| board[currX + 1][currY] == '*')
+			if (board[currX + 2][currY] == ' '
+					|| board[currX + 2][currY] == '.')
 				ret.add('R');
 
-		assert(ret.size() <= 4);
+		assert (ret.size() <= 4);
 		return ret;
 	}
 
-	// TODO fix this so be able to prune more.
-	public boolean hasDeadlock()
-	{
-		for(int x = 0; x < width; ++x)
-		{
-			for(int y = 0; y < height; ++y)
-			{
-				if(board[x][y] == '$')
-				{
-					if(DEADLOCKS[x][y] == 0)
+	public boolean hasDeadlock() {
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				if (board[x][y] == '$') {
+					
+					
+					if (DEADLOCKS[x][y] == 0)
 						return true;
-
-					//4x squares
-					if(isBlocking(x-1, y-1) && isBlocking(x-1, y) && isBlocking(x, y-1))
+					
+					
+					if(FreezeDeadlockFinder.isFreezeDeadlock(new Board(this)))
 						return true;
-
-					if(isBlocking(x+1, y-1) && isBlocking(x, y-1) && isBlocking(x+1, y))
+					
+					
+					
+					// 4x squares
+					if (isBlocking(x - 1, y - 1) && isBlocking(x - 1, y)
+							&& isBlocking(x, y - 1)){
+						//System.out.println(this);
 						return true;
+					}
+						
 
-					if(isBlocking(x+1, y+1) && isBlocking(x+1, y) && isBlocking(x, y+1))
+					if (isBlocking(x + 1, y - 1) && isBlocking(x, y - 1)
+							&& isBlocking(x + 1, y)){
+						//System.out.println(this);
 						return true;
+					}
 
-					if(isBlocking(x-1, y+1) && isBlocking(x-1, y) && isBlocking(x, y+1))
-						return true;                                        
+					if (isBlocking(x + 1, y + 1) && isBlocking(x + 1, y)
+							&& isBlocking(x, y + 1)){
+						//System.out.println(this);
+						return true;
+					}
+
+					if (isBlocking(x - 1, y + 1) && isBlocking(x - 1, y)
+							&& isBlocking(x, y + 1)){
+						//System.out.println(this);
+						return true;
+					}
+					
+					
+						
 				}
 			}
 		}
 		return false;
 	}
 
-	private boolean isWall(int x, int y){
-		if(board[x][y] == '#')
+	private boolean isWall(int x, int y) {
+		if (board[x][y] == '#')
 			return true;
 		else
 			return false;
 	}
 
-	private boolean isBlocking(int x, int y){
-		if(board[x][y] == '#')
+	private boolean isBlocking(int x, int y) {
+		if (board[x][y] == '#')
 			return true;
 
-		if(board[x][y] == '$')
+		if (board[x][y] == '$')
 			return true;
-
-		if(board[x][y] == '*')
+		
+		if (board[x][y] == '*')
 			return true;
+			
 
 		return false;
 	}
 
-
 	@Override
-	public int hashCode() 
-	{
-		int sum = 0;
-		//System.out.println("H: "+height+", W: "+width);
-		StringBuilder sb = new StringBuilder(""+currX+currY);
-		for (int x = 0; x<width; ++x)
-			for (int y = 0; y<height; ++y)
-				//@TODO: CHECK HASH FUNCTION!!
-				sb.append(board[x][y]+x+y);
-		//System.out.println(sb.toString().hashCode());
+	public int hashCode() {
+		// System.out.println("H: "+height+", W: "+width);
+		StringBuilder sb = new StringBuilder("" + currX + currY);
+		for (int x = 0; x < width; ++x)
+			for (int y = 0; y < height; ++y)
+				// @TODO: CHECK HASH FUNCTION!!
+				sb.append(board[x][y] + x + y);
+		// System.out.println(sb.toString().hashCode());
 		return sb.toString().hashCode();
 	}
 
 	@Override
-	public boolean equals(Object b)
-	{        
+	public boolean equals(Object b) {
 
-		if(this == b)
+		if (this == b)
 			return true;
-		if(!(b instanceof Board))
+		if (!(b instanceof Board))
 			return false;
 
 		Board that = (Board) b;
 
-
-		for(int x = 0; x < width; ++x)
-		{
-			for(int y = 0; y < height; ++y)
-			{
-				if(this.board[x][y] != that.board[x][y])
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				if (this.board[x][y] != that.board[x][y])
 					return false;
 			}
 		}
-		if(this.currY != that.currY)
+		if (this.currY != that.currY)
 			return false;
 
-		if(this.currX != that.currX)
+		if (this.currX != that.currX)
 			return false;
 
 		return true;
 	}
 
-
-	public int compareTo(Board b){
-		//return (this.hScore) - (b.hScore);
-		return (this.hScore + this.gScore) - (b.hScore + b.gScore);
+	public int compareTo(Board b) {
+		//return (this.heuristic) - (b.heuristic);
+		return (this.heuristic + this.pathLenght) - (b.heuristic + b.pathLenght);
 	}
 
 	/*
 	 * (non-Javadoc)
+	 * 
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		for (int y = 0; y < height; y++) {
 			for (int x = 0; x < width; ++x) {
-				if(currX == x && currY == y)
-				{
-					if(board[x][y] == '.')
+				if (currX == x && currY == y) {
+					if (board[x][y] == '.')
 						res.append('+');
 					else
 						res.append('@');
-				}
-				else
-				{
+				} else {
 					res.append(board[x][y]);
 				}
 			}
@@ -460,13 +456,10 @@ public class Board implements Comparable<Board> {
 		return res.toString();
 	}
 
-	public String boardWeightToString()
-	{
+	public static String boardWeightToString() {
 		StringBuilder sb = new StringBuilder();
-		for(int y = 0; y < height; ++y)
-		{
-			for(int x = 0; x < width; ++x)
-			{
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
 				sb.append(BOARDWEIGHT[x][y] + "\t");
 			}
 			sb.append('\n');
@@ -474,14 +467,11 @@ public class Board implements Comparable<Board> {
 
 		return sb.toString();
 	}
-	
-	public String deadlocksToString()
-	{
+
+	public String deadlocksToString() {
 		StringBuilder sb = new StringBuilder();
-		for(int y = 0; y < height; ++y)
-		{
-			for(int x = 0; x < width; ++x)
-			{
+		for (int y = 0; y < height; ++y) {
+			for (int x = 0; x < width; ++x) {
 				sb.append(DEADLOCKS[x][y]);
 			}
 			sb.append('\n');
