@@ -5,7 +5,7 @@ import java.util.*;
 public class Board implements Comparable<Board> {
 	public int currX, currY;
 	public static int width = -1, height = -1;
-	public static final int PLWEIGHT = 1, HWEIGHT = 5, SWEIGHT = 100, NWEIGHT = 3;
+	public static final int PLWEIGHT = 1, HWEIGHT = 3, USWEIGHT = 3, NWEIGHT = 1;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
 	public static int[][] DEADLOCKS;
@@ -14,7 +14,7 @@ public class Board implements Comparable<Board> {
 
 	int pathLenght;
 	int heuristic;
-	int solved;
+	int unSolved;
 	int nearBox;
 
 
@@ -356,8 +356,8 @@ public class Board implements Comparable<Board> {
 			}
 		}
 
-		//if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
-			//return true;
+		if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
+			return true;
 
 		return false;
 	}
@@ -420,8 +420,8 @@ public class Board implements Comparable<Board> {
 	}
 
 	public int compareTo(Board b) {
-		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT - this.solved * SWEIGHT + this.nearBox * NWEIGHT)
-				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT - b.solved * SWEIGHT + b.nearBox * NWEIGHT);
+		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT + this.unSolved * USWEIGHT + this.nearBox * NWEIGHT)
+				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT + b.unSolved * USWEIGHT + b.nearBox * NWEIGHT);
 	}
 
 	/*
@@ -441,6 +441,7 @@ public class Board implements Comparable<Board> {
 				} else {
 					res.append(board[x][y]);
 				}
+				res.append(' ');
 			}
 			res.append('\n');
 		}

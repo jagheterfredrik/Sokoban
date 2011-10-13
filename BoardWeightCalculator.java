@@ -9,7 +9,7 @@ public class BoardWeightCalculator {
 			for (int y = 0; y < board.height; ++y) {
 				if (board.board[x][y] == '#')
 					Board.BOARDWEIGHT[x][y] = -1;
-				else if (board.board[x][y] == '.' || board.board[x][y] == '*' || board.board[x][y] == '+')
+				else if (board.board[x][y] == '.' || board.board[x][y] == '+')
 					Board.BOARDWEIGHT[x][y] = 0;
 				else
 					Board.BOARDWEIGHT[x][y] = 10000;
@@ -39,7 +39,9 @@ public class BoardWeightCalculator {
 			for (BoardPos newBp : findIncidentBoardPosses(board, bp)) {
 
 				if (visited.add(newBp)) {
-					if(bp.depth < (Board.width + Board.height)/2)
+					if(bp.depth == 0)
+						newBp.depth = 1;
+					else if(bp.depth < (Board.width + Board.height))
 						newBp.depth = bp.depth + 1;
 					else
 						newBp.depth = bp.depth + 1;
@@ -50,7 +52,7 @@ public class BoardWeightCalculator {
 		}
 
 		for (BoardPos bp : visited) {
-			if (bp.depth < Board.BOARDWEIGHT[bp.x][bp.y])
+			if (bp.depth <= Board.BOARDWEIGHT[bp.x][bp.y])
 				Board.BOARDWEIGHT[bp.x][bp.y] = bp.depth;
 		}
 	}
