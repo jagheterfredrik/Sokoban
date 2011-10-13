@@ -35,7 +35,7 @@ public class Client {
 			*/
 			
 			System.out.println(board);
-			System.out.println(board.boardWeightToString());
+			//System.out.println(board.boardWeightToString());
 			System.out.println(board.deadlocksToString());
 
 			long time1 = System.nanoTime();
@@ -44,7 +44,7 @@ public class Client {
 			time2 = time2 / 1000 / 1000 / 1000;
 			System.out.println("Solotion found in " + time2 + "s");
 
-			Agent.printSolution(board, res, 200);
+			//Agent.printSolution(board, res, 200);
 			System.out.println(res);
 			System.out.println("Solution lenght: " + res.length());
 

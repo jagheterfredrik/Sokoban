@@ -2,9 +2,11 @@ import java.util.*;
 
 public class Agent {
 	boolean debug;
+	HashSet<Board> visited;
 
 	Agent(boolean d) {
 		debug = d;
+		visited = new HashSet<Board>(1000000);
 	}
 
 	class IdaSolution {
@@ -20,44 +22,23 @@ public class Agent {
 	public String solveAStar(Board start) {
 		int deadCount = 0;
 
-		HashSet<Board> visited = new HashSet<Board>(10000000);
-		PriorityQueue<Board> priorityQueue = new PriorityQueue<Board>(1000000);
+		PriorityQueue<Board> priorityQueue = new PriorityQueue<Board>();
 		priorityQueue.add(start);
 
+		BoardWeightCalculator.calculateBoardWeight(start);
+		
 		start.pathLenght = 0;
 		start.heuristic = start.calcHeuristic();
-		start.unSolved = start.unsolvedBoxes();
-		start.nearBox = NearestBoxFinder.calcNearBox(new Board(start));
+		start.solved = 0;
+		start.nearBox = 0;//NearestBoxFinder.calcNearBox(start);
+		
+		int iterations = 0;
 
 		while (!priorityQueue.isEmpty()) {
 			Board x = priorityQueue.poll();
 			
-			/*
-			if(priorityQueue.size() > 1000){
-				for(int i = 0; i < priorityQueue.size(); ++i){
-					Board b = priorityQueue.poll();
-					System.out.println(b.heuristic * Board.HWEIGHT + b.pathLenght * Board.PLWEIGHT + b.unSolved * Board.USWEIGHT + b.nearBox * Board.NWEIGHT);
-				}
-				System.exit(1);
-			}
-			
-			System.out.println("PQ size: " + priorityQueue.size());
-			System.out.println("V size: " + visited.size());
-			BoardWeightCalculator.calculateBoardWeight(new Board(x));
-			System.out.println(x.parentMove);
-			System.out.println("Score: " + x.heuristic);
-			System.out.println(x.boardWeightToString());
-			*/
-			
-			/*
-			System.out.println(x);
-			try {
-				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			*/
+			//if(++iterations % 10000 == 0)
+				//System.out.println("Iter: "+iterations);
 			
 			if (x.unsolvedBoxes() == 0) {
 				System.out.println("Nr of visited states: " + visited.size());
@@ -72,31 +53,29 @@ public class Agent {
 				return sb.toString();
 			}
 
+			visited.add(x);
+			
 			if (x.hasDeadlock()) {
 				deadCount++;
 				//System.out.println("DEADLOCK");
 				continue;
 			}
 
-			visited.add(x);
+			
 			for (Character c : x.findPossibleMoves()) {
 				Board y = new Board(x, c);
-				
+
 				if (visited.contains(y))
 					continue;
 
-				//BoardWeightCalculator.calculateBoardWeight(new Board(y));
+				//BoardWeightCalculator.calculateBoardWeight(y);
 				y.pathLenght = x.pathLenght + 1;
 				y.heuristic = y.calcHeuristic();
-				y.unSolved = y.unsolvedBoxes();
-				y.nearBox = NearestBoxFinder.calcNearBox(new Board(y));
-			
+				y.solved = y.solvedBoxes();
+				y.nearBox = 0;//NearestBoxFinder.calcNearBox(y);
 
-				if (!priorityQueue.contains(y)) {
-					priorityQueue.add(y);
-				} else {
-					continue;
-				}
+				priorityQueue.add(y);
+				
 				y.parent = x;
 				y.parentMove = c;
 			}
@@ -105,13 +84,12 @@ public class Agent {
 	}
 
 	public String solveIDAStar(Board board) {
-		HashSet<Board> visited = new HashSet<Board>(10000000);
 		int costLimit = board.calcHeuristic();
 		System.out.println("" + costLimit);
 		IdaSolution ir;
 		while (true) {
 
-			ir = idaDFS(board, 0, costLimit, visited);
+			ir = idaDFS(board, 0, costLimit);
 			if (ir.solution != null)
 				return ir.solution;
 
@@ -123,7 +101,7 @@ public class Agent {
 		}
 	}
 
-	public IdaSolution idaDFS(Board board, int startCost, int costLimit, HashSet<Board> visited) {
+	public IdaSolution idaDFS(Board board, int startCost, int costLimit) {
 		int minimumCost = startCost + board.calcHeuristic();
 		if (minimumCost > costLimit)
 			return new IdaSolution(minimumCost, null);
@@ -135,7 +113,7 @@ public class Agent {
 			Board newBoard = new Board(board, move);
 			visited.add(newBoard);
 			int newCost = startCost + newBoard.calcHeuristic();
-			IdaSolution res = idaDFS(newBoard, newCost, costLimit, visited);
+			IdaSolution res = idaDFS(newBoard, newCost, costLimit);
 			if (res.solution != null) {
 
 				return new IdaSolution(res.costLimit, move + res.solution);
@@ -146,8 +124,6 @@ public class Agent {
 	}
 
 	public String solveDFS(Board board, int depth) {
-		HashSet<Board> visited = new HashSet<Board>(10000000);
-		
 		if (debug)
 			System.out.println("D: " + depth);
 
@@ -190,7 +166,6 @@ public class Agent {
 	}
 
 	public String solveBFS(Board board) {
-		HashSet<Board> visited = new HashSet<Board>(10000000);
 		board.parent = null;
 		Board b = board;
 
@@ -203,7 +178,7 @@ public class Agent {
 		visited.add(b);
 		boolean stop = false;
 		while (!q.isEmpty()) {
-			b = q.pollFirst();
+			b = q.removeFirst();
 			Vector<Character> moves = b.findPossibleMoves();
 			if (moves.size() == 0)
 				continue;

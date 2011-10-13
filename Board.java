@@ -5,7 +5,7 @@ import java.util.*;
 public class Board implements Comparable<Board> {
 	public int currX, currY;
 	public static int width = -1, height = -1;
-	public static final int PLWEIGHT = 1, HWEIGHT = 3, USWEIGHT = 3, NWEIGHT = 1;
+	public static final int PLWEIGHT = 3, HWEIGHT = 5, SWEIGHT = 100, NWEIGHT = 0;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
 	public static int[][] DEADLOCKS;
@@ -14,8 +14,9 @@ public class Board implements Comparable<Board> {
 
 	int pathLenght;
 	int heuristic;
-	int unSolved;
+	int solved;
 	int nearBox;
+	private int hashCode;
 
 
 	public Board(Board board, char move) {
@@ -34,6 +35,8 @@ public class Board implements Comparable<Board> {
 		}
 
 		doMove(move);
+		//BoardWeightCalculator.calculateBoardWeight(this);
+		computeHash();
 	}
 
 	public Board(Board board) {
@@ -50,6 +53,7 @@ public class Board implements Comparable<Board> {
 				this.board[x][y] = board.board[x][y];
 
 		}
+		computeHash();
 	}
 
 	public Board(BufferedReader lIn) throws IOException {
@@ -93,10 +97,11 @@ public class Board implements Comparable<Board> {
 		}
 
 		SimpleDeadlockFinder.notDeadLockSquare(new Board(this));
-		BoardWeightCalculator.calculateBoardWeight(new Board(this));
+		//BoardWeightCalculator.calculateBoardWeight(this);
 
 		// System.out.println("NUM: "+findPossibleMoves().size());
 		parent = null;
+		computeHash();
 	}
 
 	public Board(String[] b) throws IOException {
@@ -129,10 +134,12 @@ public class Board implements Comparable<Board> {
 		}
 
 		SimpleDeadlockFinder.notDeadLockSquare(new Board(this));
-		BoardWeightCalculator.calculateBoardWeight(new Board(this));
+		//BoardWeightCalculator.calculateBoardWeight(this);
 
 		// System.out.println("NUM: "+findPossibleMoves().size());
 		parent = null;
+		
+		computeHash();
 	}
 
 	/*
@@ -162,7 +169,7 @@ public class Board implements Comparable<Board> {
 	/*
 	 * Moves the little warehouse keeper; U up - D down - L left - R right
 	 */
-	public int doMove(char move) {
+	private int doMove(char move) {
 		assert (findPossibleMoves().contains(move));
 		switch (move) {
 		case 'U':
@@ -279,7 +286,7 @@ public class Board implements Comparable<Board> {
 	 * @return Vector<Character> with all possible moves.
 	 */
 	public Vector<Character> findPossibleMoves() {
-		Vector<Character> ret = new Vector<Character>();
+		Vector<Character> ret = new Vector<Character>(4);
 
 		// UP
 		if (board[currX][currY - 1] == ' ' || board[currX][currY - 1] == '.')
@@ -356,8 +363,8 @@ public class Board implements Comparable<Board> {
 			}
 		}
 
-		if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
-			return true;
+		//if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
+			//return true;
 
 		return false;
 	}
@@ -384,19 +391,21 @@ public class Board implements Comparable<Board> {
 
 	@Override
 	public int hashCode() {
-		// System.out.println("H: "+height+", W: "+width);
-		StringBuilder sb = new StringBuilder("" + currX + currY);
-		for (int x = 0; x < width; ++x)
-			for (int y = 0; y < height; ++y)
-				// @TODO: CHECK HASH FUNCTION!!
-				sb.append(board[x][y] + x + y);
-		// System.out.println(sb.toString().hashCode());
-		return sb.toString().hashCode();
+		return hashCode;
+	}
+	
+	private void computeHash() {
+		int hash = 0;
+		for (int x = 0; x < width; ++x) {
+			for (int y = 0; y < height; ++y) {
+				hash = this.board[x][y] + (hash << 6) + (hash << 16) - hash;
+			}
+		}
+		hashCode = hash;
 	}
 
 	@Override
 	public boolean equals(Object b) {
-
 		if (this == b)
 			return true;
 		if (!(b instanceof Board))
@@ -404,8 +413,8 @@ public class Board implements Comparable<Board> {
 
 		Board that = (Board) b;
 
-		for (int x = 0; x < width; ++x) {
-			for (int y = 0; y < height; ++y) {
+		for (int x = 1; x < width-1; ++x) {
+			for (int y = 1; y < height-1; ++y) {
 				if (this.board[x][y] != that.board[x][y])
 					return false;
 			}
@@ -420,8 +429,8 @@ public class Board implements Comparable<Board> {
 	}
 
 	public int compareTo(Board b) {
-		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT + this.unSolved * USWEIGHT + this.nearBox * NWEIGHT)
-				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT + b.unSolved * USWEIGHT + b.nearBox * NWEIGHT);
+		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT - this.solved * SWEIGHT + this.nearBox * NWEIGHT)
+				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT - b.solved * SWEIGHT + b.nearBox * NWEIGHT);
 	}
 
 	/*
@@ -441,7 +450,6 @@ public class Board implements Comparable<Board> {
 				} else {
 					res.append(board[x][y]);
 				}
-				res.append(' ');
 			}
 			res.append('\n');
 		}

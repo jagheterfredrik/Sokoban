@@ -16,7 +16,7 @@ public class NearestBoxFinder {
 		boardPos.depth = 0;
 
 		while (!queue.isEmpty()) {
-			BoardPos bp = queue.pollFirst();
+			BoardPos bp = queue.removeFirst();
 
 			if(board.board[bp.x][bp.y] == '$')
 			{
@@ -44,7 +44,7 @@ public class NearestBoxFinder {
 
 	private static Vector<BoardPos> findIncidentBoardPosses(Board board,
 			BoardPos bp) {
-		Vector<BoardPos> ret = new Vector<BoardPos>();
+		Vector<BoardPos> ret = new Vector<BoardPos>(4);
 		int currX = bp.x;
 		int currY = bp.y;
 

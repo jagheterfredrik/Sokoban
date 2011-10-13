@@ -63,7 +63,7 @@ public class SimpleDeadlockFinder {
 	 */
 	public static Vector<BoardPos> findPossiblePulls(Board board,
 			BoardPos boardPos) {
-		Vector<BoardPos> ret = new Vector<BoardPos>();
+		Vector<BoardPos> ret = new Vector<BoardPos>(4);
 		board.currY = boardPos.y;
 		board.currX = boardPos.x;
 		if (board.currY - 2 > 0) {

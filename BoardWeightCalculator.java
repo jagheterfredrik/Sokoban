@@ -5,19 +5,19 @@ public class BoardWeightCalculator {
 	public static void calculateBoardWeight(Board board) {
 		Board.BOARDWEIGHT = new int[board.width][board.height];
 
-		for (int x = 0; x < board.width; ++x) {
-			for (int y = 0; y < board.height; ++y) {
+		for (int x = 1; x < board.width-1; ++x) {
+			for (int y = 1; y < board.height-1; ++y) {
 				if (board.board[x][y] == '#')
 					Board.BOARDWEIGHT[x][y] = -1;
-				else if (board.board[x][y] == '.' || board.board[x][y] == '+')
+				else if (board.board[x][y] == '.' || board.board[x][y] == '*' || board.board[x][y] == '+')
 					Board.BOARDWEIGHT[x][y] = 0;
 				else
 					Board.BOARDWEIGHT[x][y] = 10000;
 			}
 		}
 
-		for (int x = 0; x < board.width; ++x) {
-			for (int y = 0; y < board.height; ++y) {
+		for (int x = 1; x < board.width-1; ++x) {
+			for (int y = 1; y < board.height-1; ++y) {
 				if (board.board[x][y] == '.' || board.board[x][y] == '+') {
 					BFS(board, new BoardPos(x, y));
 				}
@@ -26,7 +26,7 @@ public class BoardWeightCalculator {
 	}
 
 	private static void BFS(Board board, BoardPos boardPos) {
-		HashSet<BoardPos> visited = new HashSet<BoardPos>();
+		HashSet<BoardPos> visited = new HashSet<BoardPos>(500);
 		LinkedList<BoardPos> queue = new LinkedList<BoardPos>();
 
 		visited.add(boardPos);
@@ -34,61 +34,38 @@ public class BoardWeightCalculator {
 		boardPos.depth = 0;
 
 		while (!queue.isEmpty()) {
-			BoardPos bp = queue.pollFirst();
+			BoardPos bp = queue.removeFirst();
 
 			for (BoardPos newBp : findIncidentBoardPosses(board, bp)) {
-
 				if (visited.add(newBp)) {
-					if(bp.depth == 0)
-						newBp.depth = 1;
-					else if(bp.depth < (Board.width + Board.height))
-						newBp.depth = bp.depth + 1;
-					else
-						newBp.depth = bp.depth + 1;
+					newBp.depth = bp.depth + 1;
+					if (newBp.depth < Board.BOARDWEIGHT[newBp.x][newBp.y])
+						Board.BOARDWEIGHT[newBp.x][newBp.y] = newBp.depth;
 					queue.add(newBp);
 				}
-
 			}
 		}
-
-		for (BoardPos bp : visited) {
-			if (bp.depth <= Board.BOARDWEIGHT[bp.x][bp.y])
-				Board.BOARDWEIGHT[bp.x][bp.y] = bp.depth;
-		}
 	}
 
-	private static Vector<BoardPos> findIncidentBoardPosses(Board board,
-			BoardPos bp) {
-		Vector<BoardPos> ret = new Vector<BoardPos>();
-		int currX = bp.x;
-		int currY = bp.y;
+	private static Vector<BoardPos> findIncidentBoardPosses(Board board, BoardPos bp) {
+		Vector<BoardPos> ret = new Vector<BoardPos>(4);
+		int x = bp.x;
+		int y = bp.y;
 
 		// UP
-		if (!(isBlocking(board.board[currX][currY - 1])))
-			ret.add(new BoardPos(currX, currY - 1));
+		if (board.board[x][y-1] != '#' && board.board[x][y-1] != '*')
+			ret.add(new BoardPos(x, y - 1));
 		// DOWN
-		if (!(isBlocking(board.board[currX][currY + 1])))
-			ret.add(new BoardPos(currX, currY + 1));
+		if (board.board[x][y+1] != '#' && board.board[x][y+1] != '*')
+			ret.add(new BoardPos(x, y + 1));
 		// LEFT
-		if (!(isBlocking(board.board[currX - 1][currY])))
-			ret.add(new BoardPos(currX - 1, currY));
+		if (board.board[x-1][y] != '#' && board.board[x-1][y] != '*')
+			ret.add(new BoardPos(x - 1, y));
 		// RIGHT
-		if (!(isBlocking(board.board[currX + 1][currY])))
-			ret.add(new BoardPos(currX + 1, currY));
+		if (board.board[x+1][y] != '#' && board.board[x+1][y] != '*')
+			ret.add(new BoardPos(x + 1, y));
 
-		assert (ret.size() <= 4);
 		return ret;
-	}
-
-
-	private static boolean isBlocking(char c) {
-		if (c == '#')
-			return true;
-		
-		if (c == '*')
-			return true;
-		
-		return false;
 	}
 
 }

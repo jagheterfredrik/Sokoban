@@ -2,13 +2,15 @@ import java.math.*;
 import java.util.*;
 
 class BoardPos {
-	int x, y;
+	final int x, y;
 	int depth;
+	private int hashCode;
 
 	public BoardPos(int x, int y) {
 		this.x = x;
 		this.y = y;
 		depth = 0;
+		hashCode = x + 1000 * y;
 	}
 
 	int distance(BoardPos bp) {
@@ -17,7 +19,7 @@ class BoardPos {
 
 	@Override
 	public int hashCode() {
-		return x + 1000 * y;
+		return hashCode;
 	}
 
 	@Override
