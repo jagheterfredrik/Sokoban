@@ -5,7 +5,7 @@ import java.util.*;
 public class Board implements Comparable<Board> {
 	public int currX, currY;
 	public static int width = -1, height = -1;
-	public static final int PLWEIGHT = 3, HWEIGHT = 5, SWEIGHT = 100, NWEIGHT = 0;
+	public static final int PLWEIGHT = 0, HWEIGHT = 5, SWEIGHT = 100, NWEIGHT = 0;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
 	public static int[][] DEADLOCKS;
