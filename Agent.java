@@ -26,7 +26,9 @@ public class Agent {
 		priorityQueue.add(start);
 
 		start.pathLenght = 0;
-		start.heuristic = start.score();
+		start.heuristic = start.calcHeuristic();
+		start.solved = 0;
+		start.nearBox = NearestBoxFinder.calcNearBox(new Board(start));
 
 		while (!priorityQueue.isEmpty()) {
 			Board x = priorityQueue.poll();
@@ -52,9 +54,9 @@ public class Agent {
 				System.out.println("Nr of visited states: " + visited.size());
 				StringBuilder sb = new StringBuilder();
 
-				while (x.BFSParent != null) {
+				while (x.parent != null) {
 					sb.insert(0, x.parentMove);
-					x = x.BFSParent;
+					x = x.parent;
 				}
 
 				System.out.println("Nr of deadlocks: " + deadCount);
@@ -76,7 +78,9 @@ public class Agent {
 
 				BoardWeightCalculator.calculateBoardWeight(new Board(y));
 				y.pathLenght = x.pathLenght + 1;
-				y.heuristic = y.score();
+				y.heuristic = y.calcHeuristic();
+				y.solved = y.solvedBoxes();
+				y.nearBox = NearestBoxFinder.calcNearBox(new Board(y));
 			
 
 				if (!priorityQueue.contains(y)) {
@@ -84,7 +88,7 @@ public class Agent {
 				} else {
 					continue;
 				}
-				y.BFSParent = x;
+				y.parent = x;
 				y.parentMove = c;
 			}
 		}
@@ -92,7 +96,7 @@ public class Agent {
 	}
 
 	public String solveIDAStar(Board board) {
-		int costLimit = board.score();
+		int costLimit = board.calcHeuristic();
 		System.out.println("" + costLimit);
 		IdaSolution ir;
 		while (true) {
@@ -110,7 +114,7 @@ public class Agent {
 	}
 
 	public IdaSolution idaDFS(Board board, int startCost, int costLimit) {
-		int minimumCost = startCost + board.score();
+		int minimumCost = startCost + board.calcHeuristic();
 		if (minimumCost > costLimit)
 			return new IdaSolution(minimumCost, null);
 		if (board.unsolvedBoxes() == 0)
@@ -120,7 +124,7 @@ public class Agent {
 		for (Character move : board.findPossibleMoves()) {
 			Board newBoard = new Board(board, move);
 			visited.add(newBoard);
-			int newCost = startCost + newBoard.score();
+			int newCost = startCost + newBoard.calcHeuristic();
 			IdaSolution res = idaDFS(newBoard, newCost, costLimit);
 			if (res.solution != null) {
 
@@ -174,7 +178,7 @@ public class Agent {
 	}
 
 	public String solveBFS(Board board) {
-		board.BFSParent = null;
+		board.parent = null;
 		Board b = board;
 
 		if (debug)
@@ -212,7 +216,7 @@ public class Agent {
 				if (visited.add(newBoard))
 					q.addLast(newBoard);
 
-				newBoard.BFSParent = b;
+				newBoard.parent = b;
 				newBoard.parentMove = move;
 
 				if (newBoard.unsolvedBoxes() == 0) {
@@ -232,9 +236,9 @@ public class Agent {
 
 		StringBuilder sb = new StringBuilder();
 
-		while (b.BFSParent != null) {
+		while (b.parent != null) {
 			sb.insert(0, b.parentMove);
-			b = b.BFSParent;
+			b = b.parent;
 		}
 		return sb.toString();
 	}

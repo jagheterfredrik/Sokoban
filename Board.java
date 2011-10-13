@@ -5,22 +5,25 @@ import java.util.*;
 public class Board implements Comparable<Board> {
 	public int currX, currY;
 	public static int width = -1, height = -1;
-	public static final int PLWEIGHT = 2, HWEIGHT = 3, SWEIGHT = 4;
+	public static final int PLWEIGHT = 1, HWEIGHT = 5, SWEIGHT = 100, NWEIGHT = 3;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
 	public static int[][] DEADLOCKS;
-	Board BFSParent;
+	Board parent;
 	char parentMove;
 
 	int pathLenght;
 	int heuristic;
+	int solved;
+	int nearBox;
+
 
 	public Board(Board board, char move) {
 		this.currX = board.currX;
 		this.currY = board.currY;
 		this.width = board.width;
 		this.height = board.height;
-		BFSParent = null;
+		parent = null;
 
 		this.board = new char[width][height];
 
@@ -30,7 +33,7 @@ public class Board implements Comparable<Board> {
 
 		}
 
-		heuristic -= (0 * doMove(move));
+		doMove(move);
 	}
 
 	public Board(Board board) {
@@ -38,7 +41,7 @@ public class Board implements Comparable<Board> {
 		this.currY = board.currY;
 		this.width = board.width;
 		this.height = board.height;
-		BFSParent = null;
+		parent = null;
 
 		this.board = new char[width][height];
 
@@ -93,7 +96,7 @@ public class Board implements Comparable<Board> {
 		BoardWeightCalculator.calculateBoardWeight(new Board(this));
 
 		// System.out.println("NUM: "+findPossibleMoves().size());
-		BFSParent = null;
+		parent = null;
 	}
 
 	public Board(String[] b) throws IOException {
@@ -129,7 +132,7 @@ public class Board implements Comparable<Board> {
 		BoardWeightCalculator.calculateBoardWeight(new Board(this));
 
 		// System.out.println("NUM: "+findPossibleMoves().size());
-		BFSParent = null;
+		parent = null;
 	}
 
 	/*
@@ -246,16 +249,15 @@ public class Board implements Comparable<Board> {
 		return 0;
 	}
 
-	public int score() {
-		int score = 0;
+	public int calcHeuristic() {
+		int sum = 0;
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; ++y) {
 				if (board[x][y] == '$')
-					score += BOARDWEIGHT[x][y];
+					sum += BOARDWEIGHT[x][y];
 			}
 		}
-		score -= (SWEIGHT * solvedBoxes());
-		return score;
+		return sum;
 	}
 
 	/*
@@ -354,8 +356,8 @@ public class Board implements Comparable<Board> {
 			}
 		}
 
-		if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
-			return true;
+		//if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
+			//return true;
 
 		return false;
 	}
@@ -418,8 +420,8 @@ public class Board implements Comparable<Board> {
 	}
 
 	public int compareTo(Board b) {
-		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT)
-				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT);
+		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT - this.solved * SWEIGHT + this.nearBox * NWEIGHT)
+				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT - b.solved * SWEIGHT + b.nearBox * NWEIGHT);
 	}
 
 	/*
@@ -468,4 +470,5 @@ public class Board implements Comparable<Board> {
 
 		return sb.toString();
 	}
+
 }
