@@ -22,20 +22,15 @@ public class Client {
 			Board board = new Board(lIn);
 
 			/*
-			String[] lol = new String[12];
+			String[] lol = new String[8];
 			lol[0] =  "#######";
-			lol[1] =  "#     #";
+			lol[1] =  "#  .  #";
 			lol[2] =  "#     #";
-			lol[3] =  "#  $  #";
-			lol[4] =  "###.###";
-			lol[5] =  "###.###";
-			lol[6] =  "###.###";
-			lol[7] =  "#     #";
-			lol[8] =  "# $ $ #";
-			lol[9] =  "#     #";
-			lol[10] = "#@    #";
-			lol[11] = "#######";
-
+			lol[3] =  "#  .  #";
+			lol[4] =  "#     #";
+			lol[5] =  "#  $$ #";
+			lol[6] =  "#@    #";
+			lol[7] =  "#######";
 			Board board = new Board(lol);
 			*/
 			
@@ -49,7 +44,7 @@ public class Client {
 			time2 = time2 / 1000 / 1000 / 1000;
 			System.out.println("Solotion found in " + time2 + "s");
 
-			Agent.printSolution(board, res, 200);
+			//Agent.printSolution(board, res, 200);
 			System.out.println(res);
 			System.out.println("Solution lenght: " + res.length());
 

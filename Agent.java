@@ -75,7 +75,7 @@ public class Agent {
 					continue;
 
 				BoardWeightCalculator.calculateBoardWeight(new Board(y));
-				y.pathLenght = x.pathLenght + 3;
+				y.pathLenght = x.pathLenght + 1;
 				y.heuristic = y.score();
 			
 
@@ -88,7 +88,7 @@ public class Agent {
 				y.parentMove = c;
 			}
 		}
-		return "";
+		return null;
 	}
 
 	public String solveIDAStar(Board board) {

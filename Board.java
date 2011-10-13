@@ -5,6 +5,7 @@ import java.util.*;
 public class Board implements Comparable<Board> {
 	public int currX, currY;
 	public static int width = -1, height = -1;
+	public static final int PLWEIGHT = 2, HWEIGHT = 3, SWEIGHT = 4;
 	public char[][] board;
 	public static int[][] BOARDWEIGHT;
 	public static int[][] DEADLOCKS;
@@ -29,7 +30,7 @@ public class Board implements Comparable<Board> {
 
 		}
 
-		doMove(move);
+		heuristic -= (0 * doMove(move));
 	}
 
 	public Board(Board board) {
@@ -158,7 +159,7 @@ public class Board implements Comparable<Board> {
 	/*
 	 * Moves the little warehouse keeper; U up - D down - L left - R right
 	 */
-	public void doMove(char move) {
+	public int doMove(char move) {
 		assert (findPossibleMoves().contains(move));
 		switch (move) {
 		case 'U':
@@ -170,6 +171,8 @@ public class Board implements Comparable<Board> {
 					board[currX][currY - 1] = '*';
 				else
 					board[currX][currY - 1] = '$';
+				
+				return 1;
 			} else if (board[currX][currY] == '*') {
 				board[currX][currY] = '.';
 
@@ -188,6 +191,8 @@ public class Board implements Comparable<Board> {
 					board[currX][currY + 1] = '*';
 				else
 					board[currX][currY + 1] = '$';
+				
+				return 1;
 			} else if (board[currX][currY] == '*') {
 				board[currX][currY] = '.';
 
@@ -206,6 +211,8 @@ public class Board implements Comparable<Board> {
 					board[currX - 1][currY] = '*';
 				else
 					board[currX - 1][currY] = '$';
+				
+				return 1;
 			} else if (board[currX][currY] == '*') {
 				board[currX][currY] = '.';
 
@@ -224,6 +231,8 @@ public class Board implements Comparable<Board> {
 					board[currX + 1][currY] = '*';
 				else
 					board[currX + 1][currY] = '$';
+				
+				return 1;
 			} else if (board[currX][currY] == '*') {
 				board[currX][currY] = '.';
 
@@ -234,47 +243,33 @@ public class Board implements Comparable<Board> {
 			}
 			break;
 		}
+		return 0;
 	}
 
 	public int score() {
 		int score = 0;
 		for (int x = 0; x < width; x++) {
 			for (int y = 0; y < height; ++y) {
-				if (board[x][y] == '$' || board[x][y] == '*')
+				if (board[x][y] == '$')
 					score += BOARDWEIGHT[x][y];
 			}
 		}
-		score -= (100 * solvedBoxes());
+		score -= (SWEIGHT * solvedBoxes());
 		return score;
 	}
 
 	/*
-	public int score2() {
-		Vector<BoardPos> boxes = new Vector<BoardPos>();
-		Vector<BoardPos> holders = new Vector<BoardPos>();
-
-		for (int x = 0; x < width; ++x) {
-			for (int y = 0; y < height; ++y) {
-				char c = board[x][y];
-				if (c == '$')
-					boxes.add(new BoardPos(x, y));
-				else if (c == '.')
-					holders.add(new BoardPos(x, y));
-			}
-		}
-
-		int tot = 0;
-		for (BoardPos box : boxes) {
-			int last = Integer.MAX_VALUE;
-			for (BoardPos holder : holders) {
-				int len = holder.distance(box);
-				last = Math.min(len, last);
-			}
-			tot += last;
-		}
-		return tot;
-	}
-	*/
+	 * public int score2() { Vector<BoardPos> boxes = new Vector<BoardPos>();
+	 * Vector<BoardPos> holders = new Vector<BoardPos>();
+	 * 
+	 * for (int x = 0; x < width; ++x) { for (int y = 0; y < height; ++y) { char
+	 * c = board[x][y]; if (c == '$') boxes.add(new BoardPos(x, y)); else if (c
+	 * == '.') holders.add(new BoardPos(x, y)); } }
+	 * 
+	 * int tot = 0; for (BoardPos box : boxes) { int last = Integer.MAX_VALUE;
+	 * for (BoardPos holder : holders) { int len = holder.distance(box); last =
+	 * Math.min(len, last); } tot += last; } return tot; }
+	 */
 
 	/*
 	 * Finds all possible moves from our current location.
@@ -322,51 +317,46 @@ public class Board implements Comparable<Board> {
 	}
 
 	public boolean hasDeadlock() {
+
 		for (int x = 0; x < width; ++x) {
 			for (int y = 0; y < height; ++y) {
 				if (board[x][y] == '$') {
-					
-					
+
 					if (DEADLOCKS[x][y] == 0)
 						return true;
-					
-					
-					if(FreezeDeadlockFinder.isFreezeDeadlock(new Board(this)))
-						return true;
-					
-					
-					
+
 					// 4x squares
 					if (isBlocking(x - 1, y - 1) && isBlocking(x - 1, y)
-							&& isBlocking(x, y - 1)){
-						//System.out.println(this);
+							&& isBlocking(x, y - 1)) {
+						// System.out.println(this);
 						return true;
 					}
-						
 
 					if (isBlocking(x + 1, y - 1) && isBlocking(x, y - 1)
-							&& isBlocking(x + 1, y)){
-						//System.out.println(this);
+							&& isBlocking(x + 1, y)) {
+						// System.out.println(this);
 						return true;
 					}
 
 					if (isBlocking(x + 1, y + 1) && isBlocking(x + 1, y)
-							&& isBlocking(x, y + 1)){
-						//System.out.println(this);
+							&& isBlocking(x, y + 1)) {
+						// System.out.println(this);
 						return true;
 					}
 
 					if (isBlocking(x - 1, y + 1) && isBlocking(x - 1, y)
-							&& isBlocking(x, y + 1)){
-						//System.out.println(this);
+							&& isBlocking(x, y + 1)) {
+						// System.out.println(this);
 						return true;
 					}
-					
-					
-						
+
 				}
 			}
 		}
+
+		if (FreezeDeadlockFinder.hasFreeze(new Board(this)))
+			return true;
+
 		return false;
 	}
 
@@ -383,10 +373,9 @@ public class Board implements Comparable<Board> {
 
 		if (board[x][y] == '$')
 			return true;
-		
+
 		if (board[x][y] == '*')
 			return true;
-			
 
 		return false;
 	}
@@ -429,8 +418,8 @@ public class Board implements Comparable<Board> {
 	}
 
 	public int compareTo(Board b) {
-		//return (this.heuristic) - (b.heuristic);
-		return (this.heuristic + this.pathLenght) - (b.heuristic + b.pathLenght);
+		return (this.heuristic * HWEIGHT + this.pathLenght * PLWEIGHT)
+				- (b.heuristic * HWEIGHT + b.pathLenght * PLWEIGHT);
 	}
 
 	/*
