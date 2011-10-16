@@ -413,17 +413,18 @@ public class Board implements Comparable<Board> {
 
 		Board that = (Board) b;
 
+		if (this.currY != that.currY)
+			return false;
+
+		if (this.currX != that.currX)
+			return false;
+
 		for (int x = 1; x < width-1; ++x) {
 			for (int y = 1; y < height-1; ++y) {
 				if (this.board[x][y] != that.board[x][y])
 					return false;
 			}
 		}
-		if (this.currY != that.currY)
-			return false;
-
-		if (this.currX != that.currX)
-			return false;
 
 		return true;
 	}
